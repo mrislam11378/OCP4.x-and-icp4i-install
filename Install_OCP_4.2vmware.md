@@ -15,8 +15,7 @@
 
 ## Introduction
 
-This document shows step by step guide for installing [OpenShift 4.2](<https://docs.openshift.com/>
-container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic
+This document shows step by step guide for installing [OpenShift 4.2](https://docs.openshift.com/container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic
 guide. It does not explain the material, rather just a step by step guide as I follow the sources
 cited below.
 **NOTE: The rsource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match**
@@ -143,11 +142,11 @@ CP4D|8| | | |
     cp install-config.yaml /opt/install-config.yaml.bak
 ```
 
-12. kasuhg
-13. asf
-14. qr
-15. qwer
-16. qer
+12. new point
+13. new point
+14. new point
+15. new point
+16. new point
 
 ## Scaling up Nodes
 
