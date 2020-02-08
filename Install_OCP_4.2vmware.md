@@ -142,11 +142,24 @@ CP4D|8| | | |
     cp install-config.yaml /opt/install-config.yaml.bak
 ```
 
-12. new point
-13. new point
-14. new point
+13. Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
+
+    ```bash
+    cd /opt
+    ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
+    ```
+
+14. Now we will create the ignition files. Run the following command from `/opt`. This will consume all your manifests file so you might want to create backups but it's not much work to create the manifests file if you have a backup of your `install-config.yaml` file and if you want to make any changes to the conifg, you have to recreate the manifests anyway.
+
+    ```bash
+    ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
+    ```
+
+This will create `bootstrap.igm`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
+
 15. new point
-16. new point
+16. new piont
+17. new point
 
 ## Scaling up Nodes
 
