@@ -10,8 +10,9 @@
 - [Scaling up Nodes](#scaling-up-nodes)
 - [Scaling out Cluster (Adding worker nodes)](#scaling-out-cluster-adding-worker-nodes)
 - [Appendix](#appendix)
-  - [Command History](#command-history)
-  - [install-config.yaml for vmware cluster](#install-configyaml-for-vmware-cluster)
+  - [[A] Command History](#a-command-history)
+  - [[B] install-config.yaml for vmware cluster](#b-install-configyaml-for-vmware-cluster)
+  - [[C] append-bootstrap.ign for vmware cluster](#c-append-bootstrapign-for-vmware-cluster)
 
 ## Introduction
 
@@ -130,11 +131,30 @@ CP4D|8| | | |
     vim pull-secret.txt #press `i` to goto insert mode, `cmd+v` to paste, `esc` to exit insert mode and `:wq` to save and quit
     ```
 
-12. In your project directory, create a file named install-config.yaml with the contents from [install-config.yaml for vmware cluster](#install-configyaml-for-vmware-cluster). **NOTE: Replace anything in [square brackets] with your values**
+12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
 
     ```bash
-    cd /opt/mislam
-    vim install-config.yaml # paste the vmware configs, save and quit. (i -> cmd+v -> :wq)
+    apiVersion: v1
+    baseDomain: ocp.csplab.local
+    compute:
+    - hyperthreading: Enabled
+    name: worker
+    replicas: 0
+    controlPlane:
+    hyperthreading: Enabled
+    name: master
+    replicas: 3
+    metadata:
+    name: [name of your cluster] # in my case mislam as I create /mislam inside of /opt
+    platform:
+    vsphere:
+        vcenter: demo-vcenter.csplab.local
+        username: [Muhammad.Islam] # my vSphere username i.e. the login used for vSphere
+        password: [********] # your password
+        datacenter: CSPLAB
+        defaultDatastore: SANDBOX_TIER4
+    pullSecret: '[your pull secret. Dont forget the single quotes]'
+    sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quotes]'
     ```
 
 **NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
@@ -150,17 +170,43 @@ CP4D|8| | | |
     ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
     ```
 
-14. Now we will create the ignition files. Run the following command from `/opt`. This will consume all your manifests file so you might want to create backups but it's not much work to create the manifests file if you have a backup of your `install-config.yaml` file and if you want to make any changes to the conifg, you have to recreate the manifests anyway.
+14. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
 
     ```bash
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
     ```
 
-This will create `bootstrap.igm`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
+This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-15. new point
+15. The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
+**NOTE: Replace anything in [square brackets] with your values**
+
+    ```bash
+    {
+    "ignition": {
+        "config": {
+        "append": [
+            {
+            "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
+            "verification": {}
+            }
+        ]
+        },
+        "timeouts": {},
+        "version": "2.1.0"
+    },
+    "networkd": {},
+    "passwd": {},
+    "storage": {},
+    "systemd": {}
+    }
+    ```
+**FAQ:** Why is it `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
+**Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`
+
 16. new piont
-17. new point
+17. poasdf
+18. new point
 
 ## Scaling up Nodes
 
@@ -168,7 +214,7 @@ This will create `bootstrap.igm`, `master.ign`, `worker.ign`, `/auth` and `metad
 
 ## Appendix
 
-### Command History
+### [A] Command History
 
 ```bash
 mkdir /opt/mislam
@@ -193,7 +239,7 @@ cd /opt/mislam
 vim install-config.yaml #Paste the vmware configs
 ```
 
-### install-config.yaml for vmware cluster
+### [B] install-config.yaml for vmware cluster
 
 ```bash
 apiVersion: v1
@@ -220,3 +266,28 @@ sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quo
 ```
 
 **Note**: Goto <https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md#create-the-installation-server> for proper explanation of each field
+
+### [C] append-bootstrap.ign for vmware cluster
+
+**Note:** Replace the contents inside square brackets with the URL to your bootstrap.ign. (In my case it's `http://172.18.6.67/mislam/bootstrap.ign`).
+
+```bash
+{
+  "ignition": {
+    "config": {
+      "append": [
+        {
+          "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
+          "verification": {}
+        }
+      ]
+    },
+    "timeouts": {},
+    "version": "2.1.0"
+  },
+  "networkd": {},
+  "passwd": {},
+  "storage": {},
+  "systemd": {}
+}
+```
