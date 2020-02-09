@@ -53,6 +53,7 @@ LB|1|4|16|120|
 NFS|1|2|8|500|
 
 **Note:** For installing could pak the workers might need to be scaled up. Common Configs:
+
 **CPAK**|**Number of Worker**|**CPU**|**RAM**|**DISK**|**DISK2**
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 CP4I|8|16|64|200|
