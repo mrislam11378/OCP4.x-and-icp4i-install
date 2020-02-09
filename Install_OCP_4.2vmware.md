@@ -178,7 +178,7 @@ CP4D|8| | | |
 
 This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-15. The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
+15. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
 **NOTE: Replace anything in [square brackets] with your values**
 
     ```bash
@@ -202,11 +202,11 @@ This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metad
     }
     ```
 **FAQ:** Why is it `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
-**Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`
+**Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
 
-16. new piont
-17. poasdf
-18. new point
+1.  new piont
+2.  poasdf
+3.  new point
 
 ## Scaling up Nodes
 
