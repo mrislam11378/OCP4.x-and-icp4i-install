@@ -13,13 +13,14 @@
   - [[A] Command History](#a-command-history)
   - [[B] install-config.yaml for vmware cluster](#b-install-configyaml-for-vmware-cluster)
   - [[C] append-bootstrap.ign for vmware cluster](#c-append-bootstrapign-for-vmware-cluster)
+- [FAQ](#faq)
 
 ## Introduction
 
 This document shows step by step guide for installing [OpenShift 4.2](https://docs.openshift.com/container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic
 guide. It does not explain the material, rather just a step by step guide as I follow the sources
 cited below.
-**NOTE: The rsource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match**
+**NOTE: The resource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match**
 
 ## Reference Material and Links
 
@@ -201,12 +202,11 @@ This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metad
     "systemd": {}
     }
     ```
-**FAQ:** Why is it `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
-**Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
 
-1.  new piont
-2.  poasdf
-3.  new point
+16. new piont.
+17. asd.
+18. poasdf.
+19. new point.
 
 ## Scaling up Nodes
 
@@ -237,6 +237,11 @@ ssh-add ~/.ssh/id_rsa
 vim pull-secret.txt #Paste your pull secret
 cd /opt/mislam
 vim install-config.yaml #Paste the vmware configs
+cp install-config.yaml /opt/install-config.yaml.bak
+cd /opt
+./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
+./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
+vim append-bootstrap.ign #Paste the append-bootstrap.ign config
 ```
 
 ### [B] install-config.yaml for vmware cluster
@@ -291,3 +296,8 @@ sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quo
   "systemd": {}
 }
 ```
+
+## FAQ
+
+1. Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
+**Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
