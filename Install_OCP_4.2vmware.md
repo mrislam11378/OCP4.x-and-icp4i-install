@@ -47,6 +47,7 @@ Below are some recommendations that should be followed.
 
 - The resource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match
 - Anywhere you see a [square brackets], replace the contents along with the brackets and paste in your content
+- Do not turn on the master, worker, storage nodes untill all the configs will done in the install node and load balancer.
 
 ## Configuration
 
@@ -139,6 +140,7 @@ CP4D|8| | | |
     ```
 
 12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
+**NOTE: Replace anything in [square brackets] with your values**
 
     ```bash
     apiVersion: v1
@@ -209,10 +211,30 @@ This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metad
     }
     ```
 
-16. new piont.
-17. asd.
-18. poasdf.
-19. new point.
+16. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
+
+    ```bash
+    cd /opt/mislam
+    base64 -w0 append-bootstrap.ign > append-bootstrap.base64
+    base64 -w0 master.ign > master.base64
+    base64 -w0 worker.ign > worker.base64
+    ```
+
+17. Now login to vShpere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
+  ![vApp Options](images/setIgnConfigData.png) </br>
+
+  You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.</br>
+  On your installation machine cat the text of append-bootstrap.b64 file to the screen:
+  
+  ```bash
+  cat append-bootstrap.base64
+  ```
+
+  Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
+
+18. Repeat these steps for each node in your cluster. For the `master/control nodes` use the master.base64 ignition file and for the `compute/worker nodes` use the worker.base64 text.
+
+Now you have set up your install node.
 
 ## Scaling up Nodes
 
