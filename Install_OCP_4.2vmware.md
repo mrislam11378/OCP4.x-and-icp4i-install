@@ -8,10 +8,13 @@
 - [Common mistakes](#common-mistakes)
 - [Configuration](#configuration)
 - [Setting up Install Node](#setting-up-install-node)
+- [Setting up Load Balancer](#setting-up-load-balancer)
 - [Scaling up Nodes](#scaling-up-nodes)
 - [Scaling out Cluster (Adding worker nodes)](#scaling-out-cluster-adding-worker-nodes)
 - [Appendix](#appendix)
   - [[A] Command History](#a-command-history)
+    - [Install node](#install-node)
+    - [Load Balancer](#load-balancer)
   - [[B] install-config.yaml for vmware cluster](#b-install-configyaml-for-vmware-cluster)
   - [[C] append-bootstrap.ign for vmware cluster](#c-append-bootstrapign-for-vmware-cluster)
   - [[D] haproxy.conf for vmware cluster](#d-haproxyconf-for-vmware-cluster)
@@ -236,6 +239,10 @@ This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metad
 
 Now you have set up your install node.
 
+## Setting up Load Balancer
+
+1. In vSphere, turn on the load balancer. Then from the install node, ssh into the load balancer.
+
 ## Scaling up Nodes
 
 ## Scaling out Cluster (Adding worker nodes)
@@ -243,6 +250,8 @@ Now you have set up your install node.
 ## Appendix
 
 ### [A] Command History
+
+#### Install node
 
 ```bash
 mkdir /opt/mislam
@@ -270,6 +279,16 @@ cd /opt
 ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
 ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
 vim append-bootstrap.ign #Paste the append-bootstrap.ign config
+cp append-bootstrap.ign mislam/append-bootstrap.ign
+cd /opt/mislam
+base64 -w0 append-bootstrap.ign > append-bootstrap.base64
+base64 -w0 master.ign > master.base64
+base64 -w0 worker.ign > worker.base64
+```
+
+#### Load Balancer
+
+```bash
 ```
 
 ### [B] install-config.yaml for vmware cluster
