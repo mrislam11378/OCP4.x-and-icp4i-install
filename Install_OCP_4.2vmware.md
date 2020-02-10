@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Reference Material and Links](#reference-material-and-links)
 - [Recommendations](#recommendations)
+- [Common mistakes](#common-mistakes)
 - [Configuration](#configuration)
 - [Setting up Install Node](#setting-up-install-node)
 - [Scaling up Nodes](#scaling-up-nodes)
@@ -21,7 +22,6 @@
 This document shows step by step guide for installing [OpenShift 4.2](https://docs.openshift.com/container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic
 guide. It does not explain the material, rather just a step by step guide as I follow the sources
 cited below.
-**NOTE: The resource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match**
 
 ## Reference Material and Links
 
@@ -42,6 +42,11 @@ Below are some recommendations that should be followed.
   - Is the Network adapter set to OCP
   - Was there anything wrong with configuring DNS and DHCP server (Talk with [Alec](https://ibm-cloud.slack.com/team/WCBLF8SRZ) or [Victor](https://ibm-cloud.slack.com/team/W3H1D4WAV))
 - Ability to SSH into the install node as admin. (TODO: is it safe to update and upgrade install node)
+
+## Common mistakes
+
+- The resource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match
+- Anywhere you see a [square brackets], replace the contents along with the brackets and paste in your content
 
 ## Configuration
 
