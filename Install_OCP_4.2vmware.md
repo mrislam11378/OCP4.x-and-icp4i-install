@@ -13,6 +13,7 @@
   - [[A] Command History](#a-command-history)
   - [[B] install-config.yaml for vmware cluster](#b-install-configyaml-for-vmware-cluster)
   - [[C] append-bootstrap.ign for vmware cluster](#c-append-bootstrapign-for-vmware-cluster)
+  - [[D] haproxy.conf for vmware cluster](#d-haproxyconf-for-vmware-cluster)
 - [FAQ](#faq)
 
 ## Introduction
@@ -297,7 +298,106 @@ sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quo
 }
 ```
 
+### [D] haproxy.conf for vmware cluster
+
+```bash
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+    # Default SSL material locations
+    ca-base /etc/ssl/certs
+    crt-base /etc/ssl/private
+    # Default ciphers to use on SSL-enabled listening sockets.
+    # For more information, see ciphers(1SSL). This list is from:
+    #  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+#   ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+#   ssl-default-bind-options no-sslv3
+    ssl-default-bind-ciphers PROFILE=SYSTEM
+    ssl-default-server-ciphers PROFILE=SYSTEM
+defaults
+    log global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+        timeout http-request  10s
+        timeout queue  1m
+        timeout connect 10s
+        timeout client  1m
+        timeout server  1m
+        timeout http-keep-alive  10s
+        timeout check  10s
+    maxconn 3000
+frontend api
+    bind *:6443
+    mode tcp
+    default_backend     api
+frontend machine-config
+    bind *:22623
+    mode tcp
+    default_backend     machine-config
+frontend http
+    bind *:80
+    mode http
+    default_backend     http
+frontend https
+    bind *:443
+    mode tcp
+    default_backend https
+backend api
+    mode tcp
+    balance roundrobin
+    server bootstrap       <IP Address>:6443 check
+    server control-plane-0 <IP Address>:6443 check
+    server control-plane-1 <IP Address>:6443 check
+    server control-plane-2 <IP Address>:6443 check
+backend machine-config
+    mode tcp
+    balance roundrobin
+    server bootstrap       <IP address>:22623 check
+    server control-plane-0 <IP address>:22623 check
+    server control-plane-1 <IP address>:22623 check
+    server control-plane-2 <IP address>:22623 check
+backend http
+    balance roundrobin
+    mode    http
+    server  compute-0 <IP address>:80 check
+    server  compute-1 <IP address>:80 check
+    server  compute-2 <IP address>:80 check
+    server  compute-3 <IP address>:80 check
+    server  compute-4 <IP address>:80 check
+    server  compute-5 <IP address>:80 check
+    server  compute-6 <IP address>:80 check
+    server  compute-7 <IP address>:80 check
+    server  storage-0 <IP address>:80 check
+    server  storage-1 <IP address>:80 check
+    server  storage-2 <IP address>:80 check
+backend https
+    balance roundrobin
+    mode tcp
+    server  compute-0 <IP Address>:443 check
+    server  compute-1 <IP Address>:443 check
+    server  compute-2 <IP Address>:443 check
+    server  compute-3 <IP Address>:443 check
+    server  compute-4 <IP Address>:443 check
+    server  compute-5 <IP Address>:443 check
+    server  compute-6 <IP Address>:443 check
+    server  compute-7 <IP Address>:443 check
+    server  storage-0 <IP Address>:443 check
+    server  storage-1 <IP Address>:443 check
+    server  storage-2 <IP Address>:443 check
+```
+
 ## FAQ
 
-1. Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
+- Why are the correct IP addresses not being assigned to my nodes?
+**Ans:** You might've assigned a wrong network adapter in your vms. Make sure the network adapter is `OCP` and not `csplab`
+
+- Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
 **Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
