@@ -9,6 +9,7 @@
 - [Cluster Configuration](#cluster-configuration)
 - [Setting up Install Node](#setting-up-install-node)
 - [Setting up Load Balancer](#setting-up-load-balancer)
+- [Spinning up the cluster](#spinning-up-the-cluster)
 - [Scaling up Nodes](#scaling-up-nodes)
 - [Scaling out Cluster (Adding worker nodes)](#scaling-out-cluster-adding-worker-nodes)
 - [Appendix](#appendix)
@@ -22,9 +23,7 @@
 
 ## Introduction
 
-This document shows step by step guide for installing [OpenShift 4.2](https://docs.openshift.com/container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic
-guide. It does not explain the material, rather just a step by step guide as I follow the sources
-cited below.
+This document shows step by step guide for installing [OpenShift 4.2](https://docs.openshift.com/container-platform/4.2/welcome/index.html) on csplab environment should not be used as a generic guide. It does not explain the material, rather just a step by step guide as I follow the sources cited below.
 
 ## Reference Material and Links
 
@@ -84,7 +83,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     ssh sysadmin@[IP address of installer]
     ```
 
-2. Create a directory for your new cluster.  In this document I will use a cluster named after my userid `mislam`.
+2. Create a directory for your new cluster.  In this document I will use a cluster named after my userid `mislam`. The cluster name **has** to match your sub domain name and resource group name. Otherwise the cluster won't be create.
 
     ```bash
     mkdir /opt/mislam
@@ -389,6 +388,34 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
     ```
 
 That's it. Load Balancer in configured.
+
+## Spinning up the cluster
+
+Once the Installer Node and the Load balancer node is configured, it's time to turn on the nodes. Although theoretically all the nodes can be turned on at once, it's recommended not to do so. Here's what I found to be the best steps in case of a failed build.
+
+1. Turn on the Bootstrap node and wait for the IP address to resolve.
+2. SSH into the installer node and run the following command
+
+   ```bash
+    ./openshift-install --dir=./mislam wait-for bootstrap-complete --log-level info
+   ```
+
+    You should see something like this
+
+    ```bash
+    INFO Waiting up to 30m0s for the Kubernetes API at https://api.mislam.ocp.csplab.local:6443...
+    ```
+
+3. Now we can ssh into the bootstrap node from the installer node and look at the systemd logs. As the `load balancer` is already configured, we can use the routes to ssh instead of IP addresses. Use whichever is easier. And the default user is `core`, not `sysadmin`
+
+   ```bash
+   ssh core@[bootstrap.mislam.ocp.csplab.local]
+   ```
+
+    **Note: You can't ssh into the cluster directly from your terminal. You have too ssh into the installer node, and from there you can ssh into anyone of the nodes**
+
+4. Now turn on all the master/control-pane nodes and wait for their IP to resolve.
+5. 
 
 ## Scaling up Nodes
 
