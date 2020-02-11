@@ -433,6 +433,11 @@ export KUBECONFIG=/opt/mislam/auth/kubeconfig
 #### Load Balancer
 
 ```bash
+sudo apt install haproxy
+sudo cp haproxy.cfg haproxy.cfg.bak
+sudo vim /etc/haproxy/haproxy.cfg # paste the configs
+sudo systemctl start haproxy  #if already running, try systemctl restart. To check status, do systemctl status
+sudo systemctl enable haproxy
 ```
 
 ### [B] install-config.yaml for vmware cluster
