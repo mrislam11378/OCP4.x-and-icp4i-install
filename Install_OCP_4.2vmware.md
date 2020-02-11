@@ -9,9 +9,9 @@
 - [Cluster Configuration](#cluster-configuration)
 - [Setting up Install Node](#setting-up-install-node)
 - [Setting up Load Balancer](#setting-up-load-balancer)
-- [Spinning up the cluster](#spinning-up-the-cluster)
-- [Scaling up Nodes](#scaling-up-nodes)
-- [Scaling out Cluster (Adding worker nodes)](#scaling-out-cluster-adding-worker-nodes)
+- [Spinning up the cluster in progress](#spinning-up-the-cluster-in-progress)
+- [Scaling up Nodes - in progress](#scaling-up-nodes---in-progress)
+- [Scaling out Cluster (Adding worker nodes) - in progress](#scaling-out-cluster-adding-worker-nodes---in-progress)
 - [Appendix](#appendix)
   - [[A] Command History](#a-command-history)
     - [Install node](#install-node)
@@ -389,7 +389,7 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
 
 That's it. Load Balancer in configured.
 
-## Spinning up the cluster
+## Spinning up the cluster in progress
 
 Once the Installer Node and the Load balancer node is configured, it's time to turn on the nodes. Although theoretically all the nodes can be turned on at once, it's recommended not to do so. Here's what I found to be the best steps in case of a failed build.
 
@@ -406,20 +406,20 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
     INFO Waiting up to 30m0s for the Kubernetes API at https://api.mislam.ocp.csplab.local:6443...
     ```
 
-3. Now we can ssh into the bootstrap node from the installer node and look at the systemd logs. As the `load balancer` is already configured, we can use the routes to ssh instead of IP addresses. Use whichever is easier. And the default user is `core`, not `sysadmin`
+3. Now we can ssh into the bootstrap node (preferably on a different terminal window) from the installer node and look at the systemd logs. As the `load balancer` is already configured, we can use the routes to ssh instead of IP addresses. Use whichever is easier. And the default user is `core`, not `sysadmin`
 
    ```bash
-   ssh core@[bootstrap.mislam.ocp.csplab.local]
+   ssh core@[bootstrap.mislam.ocp.csplab.local] # from the install node
    ```
 
-    **Note: You can't ssh into the cluster directly from your terminal. You have too ssh into the installer node, and from there you can ssh into anyone of the nodes**
+    **Note: You can't ssh into the cluster nodes (bootstrap, compute, control-pane etc) directly from your terminal. You have too ssh into the installer node, and from there you can ssh into anyone of the nodes**
 
 4. Now turn on all the master/control-pane nodes and wait for their IP to resolve.
 5. 
 
-## Scaling up Nodes
+## Scaling up Nodes - in progress
 
-## Scaling out Cluster (Adding worker nodes)
+## Scaling out Cluster (Adding worker nodes) - in progress
 
 ## Appendix
 
