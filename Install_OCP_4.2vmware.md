@@ -277,7 +277,7 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
    ```
 
     <details>
-      <summary>Show haproxy.conf</summary>
+    <summary>Show haproxy.conf</summary>
 
       ```bash
       global
