@@ -177,10 +177,17 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
           datacenter: CSPLAB
           defaultDatastore: SANDBOX_TIER4
       pullSecret: '[your pull secret. Dont forget the single quotes]'
-      sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quotes]'
+      sshKey: '[your public ssh-key from ~/.ssh/id_rsa.pub. Dont forget the single quotes]'
       ```
 
-      </details>
+    </details>
+
+    To get your public ssh key do the following, then copy-paste:
+
+    ```bash
+    cat ~/.ssh/id_rsa.pub
+    ```
+
     **NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
 
     ```bash
@@ -572,8 +579,13 @@ cd /opt/mislam
 base64 -w0 append-bootstrap.ign > append-bootstrap.base64
 base64 -w0 master.ign > master.base64
 base64 -w0 worker.ign > worker.base64
+cat append-bootstrap.base64
+cat master.base64
+cat worker.base64
+sudo apt update
+sudo apt install jq nmap
 
-
+./openshift-install --dir=./mislam wait-for bootstrap-complete --log-level info
 export KUBECONFIG=/opt/mislam/auth/kubeconfig
 ```
 
