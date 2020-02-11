@@ -6,7 +6,7 @@
 - [Reference Material and Links](#reference-material-and-links)
 - [Recommendations](#recommendations)
 - [Common mistakes](#common-mistakes)
-- [Configuration](#configuration)
+- [Cluster Configuration](#cluster-configuration)
 - [Setting up Install Node](#setting-up-install-node)
 - [Setting up Load Balancer](#setting-up-load-balancer)
 - [Scaling up Nodes](#scaling-up-nodes)
@@ -40,11 +40,11 @@ Below are some recommendations that should be followed.
 - The VM "Network Adapter" should be assigned to ocp
 - Thin Provision hard disks except the install node.
 - Have IP addresses assigned to each of the vm (DNS & DHCP already configured)
-- Only turn on the install node, check if proper IP address is assigned
+- Only turn on the install node and load balancer until all the configs are done, check if proper IP address is assigned. If not
   - Is the mac address correct?
-  - Is the Network adapter set to OCP
+  - Is the Network adapter set to OCP (Common mistake)
   - Was there anything wrong with configuring DNS and DHCP server (Talk with [Alec](https://ibm-cloud.slack.com/team/WCBLF8SRZ) or [Victor](https://ibm-cloud.slack.com/team/W3H1D4WAV))
-- Ability to SSH into the install node as admin. (TODO: is it safe to update and upgrade install node)
+- Ability to SSH into the install node as admin. Although it is possible to use the Web Console in vSphere, I **strongly** recommend using ssh unless someone wants to type a lot as Web Console doesn't support copy-paste
 
 ## Common mistakes
 
@@ -52,7 +52,7 @@ Below are some recommendations that should be followed.
 - Anywhere you see a [square brackets], replace the contents along with the brackets and paste in your content
 - Do not turn on the master, worker, storage nodes untill all the configs will done in the install node and load balancer.
 
-## Configuration
+## Cluster Configuration
 
 **Node Type**|**Number of Nodes**|**CPU**|**RAM**|**DISK**|**DISK2**
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:
@@ -76,7 +76,14 @@ CP4D|8| | | |
 
 ## Setting up Install Node
 
-1. ssh into the Install Node. You need root access to complete most of the steps so ensure that's possible
+Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX->FastStart2020Templates` but the location might change in the future.
+
+1. ssh into the Install Node. You need root access to complete most of the steps so ensure that's possible.
+
+    ```bash
+    ssh sysadmin@[IP address of installer]
+    ```
+
 2. Create a directory for your new cluster.  In this document I will use a cluster named after my userid `mislam`.
 
     ```bash
@@ -144,36 +151,37 @@ CP4D|8| | | |
 
 12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
 **NOTE: Replace anything in [square brackets] with your values**
+  
+    <details> <summary> Show install-config.yaml </summary>
+      ```bash
+      apiVersion: v1
+      baseDomain: ocp.csplab.local
+      compute:
+      - hyperthreading: Enabled
+      name: worker
+      replicas: 0
+      controlPlane:
+      hyperthreading: Enabled
+      name: master
+      replicas: 3
+      metadata:
+      name: [name of your cluster] # in my case mislam as I create /mislam inside of /opt
+      platform:
+      vsphere:
+          vcenter: demo-vcenter.csplab.local
+          username: [Muhammad.Islam] # my vSphere username i.e. the login used for vSphere
+          password: [********] # your password
+          datacenter: CSPLAB
+          defaultDatastore: SANDBOX_TIER4
+      pullSecret: '[your pull secret. Dont forget the single quotes]'
+      sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quotes]'
+      ```
+    </details>
+    **NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
 
     ```bash
-    apiVersion: v1
-    baseDomain: ocp.csplab.local
-    compute:
-    - hyperthreading: Enabled
-    name: worker
-    replicas: 0
-    controlPlane:
-    hyperthreading: Enabled
-    name: master
-    replicas: 3
-    metadata:
-    name: [name of your cluster] # in my case mislam as I create /mislam inside of /opt
-    platform:
-    vsphere:
-        vcenter: demo-vcenter.csplab.local
-        username: [Muhammad.Islam] # my vSphere username i.e. the login used for vSphere
-        password: [********] # your password
-        datacenter: CSPLAB
-        defaultDatastore: SANDBOX_TIER4
-    pullSecret: '[your pull secret. Dont forget the single quotes]'
-    sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quotes]'
+        cp install-config.yaml /opt/install-config.yaml.bak
     ```
-
-**NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
-
-```bash
-    cp install-config.yaml /opt/install-config.yaml.bak
-```
 
 13. Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
 
@@ -188,31 +196,33 @@ CP4D|8| | | |
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
     ```
 
-This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
+    This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
 15. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
 **NOTE: Replace anything in [square brackets] with your values**
 
-    ```bash
-    {
-    "ignition": {
-        "config": {
-        "append": [
-            {
-            "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
-            "verification": {}
-            }
-        ]
-        },
-        "timeouts": {},
-        "version": "2.1.0"
-    },
-    "networkd": {},
-    "passwd": {},
-    "storage": {},
-    "systemd": {}
-    }
-    ```
+    <details> <summary> Show append-bootstrap.ign </summary>
+      ```bash
+      {
+      "ignition": {
+          "config": {
+          "append": [
+              {
+              "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
+              "verification": {}
+              }
+          ]
+          },
+          "timeouts": {},
+          "version": "2.1.0"
+      },
+      "networkd": {},
+      "passwd": {},
+      "storage": {},
+      "systemd": {}
+      }
+      ```
+    </details>
 
 16. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
 
@@ -223,25 +233,156 @@ This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metad
     base64 -w0 worker.ign > worker.base64
     ```
 
-17. Now login to vShpere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
-  ![vApp Options](images/setIgnConfigData.png) </br>
+17. Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
+    ![vApp Options](images/setIgnConfigData.png) </br>
 
-  You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.</br>
-  On your installation machine cat the text of append-bootstrap.b64 file to the screen:
+18. You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
+    On your installation machine cat the text of append-bootstrap.b64 file to the screen:
   
-  ```bash
-  cat append-bootstrap.base64
-  ```
+    ```bash
+    cat append-bootstrap.base64
+    ```
 
-  Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
+19. Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
+20. Repeat these steps for each node in your cluster. For the `master/control nodes` use the `master.base64` ignition file and for the `compute/worker nodes` use the `worker.base64` text.
 
-18. Repeat these steps for each node in your cluster. For the `master/control nodes` use the master.base64 ignition file and for the `compute/worker nodes` use the worker.base64 text.
+Now you have set up your install node. But before moving on some packages should be installed for future steps.
 
-Now you have set up your install node.
+```bash
+sudo apt update
+sudo apt install jq nmap
+```
 
 ## Setting up Load Balancer
 
+Use `ocp42-lb-template` as template. Same location as the installer template. We will only configure 1 load balancer but in production environment it is strongly recommended to have 2. Also ensure you have gotten assigned ip addresses for each of your nodes before progressing as they will be necessary.
+
 1. In vSphere, turn on the load balancer. Then from the install node, ssh into the load balancer.
+
+   ```bash
+   ssh sysadmin@[ip address of load balancer]
+   ```
+
+2. Install `haproxy` package
+
+   ```bash
+   sudo apt install haproxy
+   ```
+
+3. Now copy and paste the following settings for haproxy.cfg and insert the correct values for any `<brackets>`. Although I recommend inserting the values first and then copying. Also it's a good idea to backup the default haproxy.cfg
+
+   ```bash
+   sudo cp haproxy.cfg haproxy.cfg.bak
+   sudo vim /etc/haproxy/haproxy.cfg
+   ```
+
+    <details>
+      <summary>Show haproxy.conf</summary>
+
+      ```bash
+      global
+          log /dev/log    local0
+          log /dev/log    local1 notice
+          chroot /var/lib/haproxy
+          stats socket /run/haproxy/admin.sock mode 660 level admin
+          stats timeout 30s
+          user haproxy
+          group haproxy
+          daemon
+          # Default SSL material locations
+          ca-base /etc/ssl/certs
+          crt-base /etc/ssl/private
+          # Default ciphers to use on SSL-enabled listening sockets.
+          # For more information, see ciphers(1SSL). This list is from:
+          #  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+      #   ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+      #   ssl-default-bind-options no-sslv3
+          ssl-default-bind-ciphers PROFILE=SYSTEM
+          ssl-default-server-ciphers PROFILE=SYSTEM
+      defaults
+          log global
+          mode    http
+          option  httplog
+          option  dontlognull
+          retries 3
+              timeout http-request  10s
+              timeout queue  1m
+              timeout connect 10s
+              timeout client  1m
+              timeout server  1m
+              timeout http-keep-alive  10s
+              timeout check  10s
+          maxconn 3000
+      frontend api
+          bind *:6443
+          mode tcp
+          default_backend     api
+      frontend machine-config
+          bind *:22623
+          mode tcp
+          default_backend     machine-config
+      frontend http
+          bind *:80
+          mode http
+          default_backend     http
+      frontend https
+          bind *:443
+          mode tcp
+          default_backend https
+      backend api
+          mode tcp
+          balance roundrobin
+          server bootstrap       <IP Address>:6443 check
+          server control-plane-0 <IP Address>:6443 check
+          server control-plane-1 <IP Address>:6443 check
+          server control-plane-2 <IP Address>:6443 check
+      backend machine-config
+          mode tcp
+          balance roundrobin
+          server bootstrap       <IP address>:22623 check
+          server control-plane-0 <IP address>:22623 check
+          server control-plane-1 <IP address>:22623 check
+          server control-plane-2 <IP address>:22623 check
+      backend http
+          balance roundrobin
+          mode    http
+          server  compute-0 <IP address>:80 check
+          server  compute-1 <IP address>:80 check
+          server  compute-2 <IP address>:80 check
+          server  compute-3 <IP address>:80 check
+          server  compute-4 <IP address>:80 check
+          server  compute-5 <IP address>:80 check
+          server  compute-6 <IP address>:80 check
+          server  compute-7 <IP address>:80 check
+          server  storage-0 <IP address>:80 check
+          server  storage-1 <IP address>:80 check
+          server  storage-2 <IP address>:80 check
+      backend https
+          balance roundrobin
+          mode tcp
+          server  compute-0 <IP Address>:443 check
+          server  compute-1 <IP Address>:443 check
+          server  compute-2 <IP Address>:443 check
+          server  compute-3 <IP Address>:443 check
+          server  compute-4 <IP Address>:443 check
+          server  compute-5 <IP Address>:443 check
+          server  compute-6 <IP Address>:443 check
+          server  compute-7 <IP Address>:443 check
+          server  storage-0 <IP Address>:443 check
+          server  storage-1 <IP Address>:443 check
+          server  storage-2 <IP Address>:443 check
+      ```
+  
+    </details>
+
+4. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up everytime the load balancer restarts.
+
+    ```bash
+    sudo systemctl start haproxy  #if already running, try systemctl restart. To check status, do systemctl status
+    sudo systemctl enable haproxy
+    ```
+
+That's it. Load Balancer in configured.
 
 ## Scaling up Nodes
 
@@ -284,6 +425,9 @@ cd /opt/mislam
 base64 -w0 append-bootstrap.ign > append-bootstrap.base64
 base64 -w0 master.ign > master.base64
 base64 -w0 worker.ign > worker.base64
+
+
+export KUBECONFIG=/opt/mislam/auth/kubeconfig
 ```
 
 #### Load Balancer
