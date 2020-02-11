@@ -9,7 +9,9 @@
 - [Cluster Configuration](#cluster-configuration)
 - [Setting up Install Node](#setting-up-install-node)
 - [Setting up Load Balancer](#setting-up-load-balancer)
-- [Spinning up the cluster in progress](#spinning-up-the-cluster-in-progress)
+- [Spinning up the cluster](#spinning-up-the-cluster)
+- [Check controller status](#check-controller-status)
+- [Configure Ceph Storage for the image-registry Operator](#configure-ceph-storage-for-the-image-registry-operator)
 - [Scaling up Nodes - in progress](#scaling-up-nodes---in-progress)
 - [Scaling out Cluster (Adding worker nodes) - in progress](#scaling-out-cluster-adding-worker-nodes---in-progress)
 - [Appendix](#appendix)
@@ -389,7 +391,7 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
 
 That's it. Load Balancer in configured.
 
-## Spinning up the cluster in progress
+## Spinning up the cluster
 
 Once the Installer Node and the Load balancer node is configured, it's time to turn on the nodes. Although theoretically all the nodes can be turned on at once, it's recommended not to do so. Here's what I found to be the best steps in case of a failed build.
 
@@ -406,7 +408,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
     INFO Waiting up to 30m0s for the Kubernetes API at https://api.mislam.ocp.csplab.local:6443...
     ```
 
-3. Now we can ssh into the bootstrap node (preferably on a different terminal window) from the installer node and look at the systemd logs. As the `load balancer` is already configured, we can use the routes to ssh instead of IP addresses. Use whichever is easier. And the default user is `core`, not `sysadmin`
+3. Now we can ssh into the bootstrap node (preferably on a different terminal window) from the installer node. As the `load balancer` is already configured, we can use the routes to ssh instead of IP addresses. Use whichever is easier. And the default user is `core`, not `sysadmin`
 
    ```bash
    ssh core@[bootstrap.mislam.ocp.csplab.local] # from the install node
@@ -414,8 +416,120 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 
     **Note: You can't ssh into the cluster nodes (bootstrap, compute, control-pane etc) directly from your terminal. You have too ssh into the installer node, and from there you can ssh into anyone of the nodes**
 
-4. Now turn on all the master/control-pane nodes and wait for their IP to resolve.
-5. 
+4. We will look at the systemd logs in the bootstrap node. We'll monitor the progress of the installation from here.
+
+   ```bash
+   journalctl -b -f -u bootkube.service
+   ```
+
+5. Now turn on all the master/control-pane nodes and wait for their IP to resolve. Once their IP resolve, they will boot up and start connection with the bootstrap node and start pulling necessary files. The `journalctl` logs will be updated.
+
+6. If we look at the logs in the `install node` (step 1), we should see this within 30 minutes.
+
+   ```bash
+   INFO Waiting up to 30m0s for the Kubernetes API at https://api.vhavard.ocp.csplab.local:6443...
+   INFO API v1.13.4+c2a5caf up
+   INFO Waiting up to 30m0s for bootstrapping to complete...
+   INFO It is now safe to remove the bootstrap resources
+   ```
+
+    Once this comes up, it's safe to shut down the bootstrap node as the master/control-pane nodes will work as new bootstrap from now on when adding new nodes.
+
+7. Now it's time to spin up all the worker/compute and storage nodes. Turn them on and wait for their IP addresses to be assigned.
+8. From the install node it's time to **Login to the OCP Cluster**. Run the following command.
+
+   ```bash
+   export KUBECONFIG=/opt/vhavard/auth/kubeconfig
+   oc whoami
+   system:admin
+   ```
+
+9. Make sure all the nodes(Control, Compute and Storage) are ready. If you see a node as `Not Ready` or is missing, you might need to approve the csr and wait.
+
+    ```bash
+    oc get nodes
+    ```
+
+10. If you don't see all nodes listed you may need to approve some certificate signing requests (CSRs). To check run the command
+
+    ```bash
+    oc get csr
+    ```
+
+11. If you see any CSR in a pending state you must approve each one. If all CSRs were automatically approved you may not see anything in this list. The command to approve a CSR is:
+
+    ```bash
+    oc adm certificate approve <csr-name> #The CSR name is the first column in the list of CSRs.
+    ```
+
+12. It's likely that you might see a lot of CSR depending on the number of compute/storage nodes. Run the following command to approve all. Install `jq` if not installed. `sudo apt install jq`
+
+    ```bash
+    oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+    ```
+
+If all nodes are in ready status, you should see something similar depending on the number of nodes
+
+```bash
+sysadmin@ocp42install:~$ oc get nodes
+NAME              STATUS   ROLES    AGE   VERSION
+compute-0         Ready    worker   20m   v1.14.6+8e46c0036
+compute-1         Ready    worker   20m   v1.14.6+8e46c0036
+compute-2         Ready    worker   20m   v1.14.6+8e46c0036
+control-plane-0   Ready    master   20m   v1.14.6+8e46c0036
+control-plane-1   Ready    master   20m   v1.14.6+8e46c0036
+control-plane-2   Ready    master   20m   v1.14.6+8e46c0036
+storage-0         Ready    worker   20m   v1.14.6+8e46c0036
+storage-1         Ready    worker   20m   v1.14.6+8e46c0036
+storage-2         Ready    worker   20m   v1.14.6+8e46c0036
+```
+
+## Check controller status
+
+Once the initial boot is complete it will still take a short while for the cluster operators to complete their configuration.
+
+Watch the following command until all operators except for image-registry are available.
+
+```bash
+watch -n5 oc get clusteroperators
+```
+
+When complete the output should look something like this:
+
+**NOTE:** When installing OCP 4.3, the image-registry operator will automatically set to Removed so that the OCP installation will successfully complete. In OCP 4.2, you must configure persistent storage or configure the image-registry operator to not use persistent storage before the installation will complete.
+
+```bash
+$ watch -n5 oc get clusteroperators
+
+NAME                                 VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                       4.2.0     True        False         False      69s
+cloud-credential                     4.2.0     True        False         False      12m
+cluster-autoscaler                   4.2.0     True        False         False      11m
+console                              4.2.0     True        False         False      46s
+dns                                  4.2.0     True        False         False      11m
+image-registry                                 False       True          False      5m26s
+ingress                              4.2.0     True        False         False      5m36s
+kube-apiserver                       4.2.0     True        False         False      8m53s
+kube-controller-manager              4.2.0     True        False         False      7m24s
+kube-scheduler                       4.2.0     True        False         False      12m
+machine-api                          4.2.0     True        False         False      12m
+machine-config                       4.2.0     True        False         False      7m36s
+marketplace                          4.2.0     True        False         False      7m54m
+monitoring                           4.2.0     True        False         False      7h54s
+network                              4.2.0     True        False         False      5m9s
+node-tuning                          4.2.0     True        False         False      11m
+openshift-apiserver                  4.2.0     True        False         False      11m
+openshift-controller-manager         4.2.0     True        False         False      5m943s
+openshift-samples                    4.2.0     True        False         False      3m55s
+operator-lifecycle-manager           4.2.0     True        False         False      11m
+operator-lifecycle-manager-catalog   4.2.0     True        False         False      11m
+service-ca                           4.2.0     True        False         False      11m
+service-catalog-apiserver            4.2.0     True        False         False      5m26s
+service-catalog-controller-manager   4.2.0     True        False         False      5m25s
+storage                              4.2.0     True        False         False      5m30s
+```
+
+## Configure Ceph Storage for the image-registry Operator
 
 ## Scaling up Nodes - in progress
 
