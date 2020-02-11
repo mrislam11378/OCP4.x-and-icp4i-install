@@ -152,7 +152,9 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
 **NOTE: Replace anything in [square brackets] with your values**
   
-    <details> <summary> Show install-config.yaml </summary>
+    <details> 
+    <summary> Show install-config.yaml </summary>
+
       ```bash
       apiVersion: v1
       baseDomain: ocp.csplab.local
@@ -176,7 +178,8 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
       pullSecret: '[your pull secret. Dont forget the single quotes]'
       sshKey: '[your public ssh-key from ~/.ssh/id-rsa.pub. Dont forget the single quotes]'
       ```
-    </details>
+
+      </details>
     **NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
 
     ```bash
@@ -201,7 +204,9 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 15. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
 **NOTE: Replace anything in [square brackets] with your values**
 
-    <details> <summary> Show append-bootstrap.ign </summary>
+    <details>
+    <summary> Show append-bootstrap.ign </summary>
+
       ```bash
       {
       "ignition": {
@@ -222,6 +227,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
       "systemd": {}
       }
       ```
+
     </details>
 
 16. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
