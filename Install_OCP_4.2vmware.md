@@ -607,84 +607,89 @@ storage                                    4.2.16    True        False         F
     ```
 
 7. Modify the `cluster.yaml` file for your environment. Note the actual file has a lot of comments for explanation and commented out blocks. You should look through them and you'll find most of the configs listed below. **Don't** just copy and paste the entire file as there might be new configs added to it by default from ceph developers.
+    
+    <details>
+    <summary> Show cluster.yaml </summary>
 
-   ```bash
-   apiVersion: ceph.rook.io/v1
-    kind: CephCluster
-    metadata:
-    name: rook-ceph
-    namespace: rook-ceph
-    spec:
-    cephVersion:
-        image: ceph/ceph:v14.2.5
-        allowUnsupported: false
-    dataDirHostPath: /var/lib/rook
-    skipUpgradeChecks: false
-    continueUpgradeAfterChecksEvenIfNotHealthy: false
-    mon:
-        count: 3
-        allowMultiplePerNode: false
-    dashboard:
-        enabled: true
-        ssl: true
-    monitoring:
-        enabled: true
-        rulesNamespace: rook-ceph
-    network:
-        hostNetwork: false
-    rbdMirroring:
-        workers: 0
-    placement:
-        all:
-        nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-                - key: role
-                operator: In
-                values:
-                - storage-node
-        podAffinity:
-        podAntiAffinity:
-        tolerations:
-        - key: storage-node
-            operator: Exists
-    annotations:
-    resources:
-        mgr:
-        limits:
-            cpu: "500m"
-            memory: "1024Mi"
-        requests:
-            cpu: "500m"
-            memory: "1024Mi"
-    removeOSDsIfOutAndSafeToRemove: false
-    storage: # cluster level storage configuration and selection
-        useAllNodes: false
-        useAllDevices: false
-        config:
-        nodes:
-        - name: "storage-0"
-        devices: # specific devices to use for storage can be specified for each node
-        - name: "sdb"
+    ```bash
+    apiVersion: ceph.rook.io/v1
+        kind: CephCluster
+        metadata:
+        name: rook-ceph
+        namespace: rook-ceph
+        spec:
+        cephVersion:
+            image: ceph/ceph:v14.2.5
+            allowUnsupported: false
+        dataDirHostPath: /var/lib/rook
+        skipUpgradeChecks: false
+        continueUpgradeAfterChecksEvenIfNotHealthy: false
+        mon:
+            count: 3
+            allowMultiplePerNode: false
+        dashboard:
+            enabled: true
+            ssl: true
+        monitoring:
+            enabled: true
+            rulesNamespace: rook-ceph
+        network:
+            hostNetwork: false
+        rbdMirroring:
+            workers: 0
+        placement:
+            all:
+            nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                    - key: role
+                    operator: In
+                    values:
+                    - storage-node
+            podAffinity:
+            podAntiAffinity:
+            tolerations:
+            - key: storage-node
+                operator: Exists
+        annotations:
+        resources:
+            mgr:
+            limits:
+                cpu: "500m"
+                memory: "1024Mi"
+            requests:
+                cpu: "500m"
+                memory: "1024Mi"
+        removeOSDsIfOutAndSafeToRemove: false
+        storage: # cluster level storage configuration and selection
+            useAllNodes: false
+            useAllDevices: false
             config:
-            osdsPerDevice: "1"
-        - name: "storage-1"
-        devices: # specific devices to use for storage can be specified for each node
-        - name: "sdb"
-            config:
-            osdsPerDevice: "1"
-        - name: "storage-2"
-        devices: # specific devices to use for storage can be specified for each node
-        - name: "sdb"
-            config:
-            osdsPerDevice: "1"
-    disruptionManagement:
-        managePodBudgets: false
-        osdMaintenanceTimeout: 30
-        manageMachineDisruptionBudgets: false
-        machineDisruptionBudgetNamespace: openshift-machine-api
-   ```
+            nodes:
+            - name: "storage-0"
+            devices: # specific devices to use for storage can be specified for each node
+            - name: "sdb"
+                config:
+                osdsPerDevice: "1"
+            - name: "storage-1"
+            devices: # specific devices to use for storage can be specified for each node
+            - name: "sdb"
+                config:
+                osdsPerDevice: "1"
+            - name: "storage-2"
+            devices: # specific devices to use for storage can be specified for each node
+            - name: "sdb"
+                config:
+                osdsPerDevice: "1"
+        disruptionManagement:
+            managePodBudgets: false
+            osdMaintenanceTimeout: 30
+            manageMachineDisruptionBudgets: false
+            machineDisruptionBudgetNamespace: openshift-machine-api
+        ```
+
+    </details>
 
 8. Create the Ceph cluster
 
@@ -882,8 +887,10 @@ storage                                    4.2.16    True        False         F
     vim pvc.yaml
     ```
 
+    <details>
+    <summary> Show pvc.yaml</summary>
+
     ```bash
-    # pvc.yaml
     ---
     apiVersion: v1
     kind: PersistentVolumeClaim
@@ -901,6 +908,8 @@ storage                                    4.2.16    True        False         F
     persistentVolumeReclaimPolicy: Retain
     storageClassName: rook-cephfs
     ```
+
+    </details>
 
 26. Deploy the PVC:
 
