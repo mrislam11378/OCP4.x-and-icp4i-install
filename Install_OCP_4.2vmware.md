@@ -732,85 +732,96 @@ storage                                    4.2.16    True        False         F
 
     You now have a running Ceph cluster, provisioned by rook. You now need to configure OCP to consume it.
 
-Deploy the rbd storage class for non-ReadWriteMany PVs
+13. Deploy the rbd storage class for non-ReadWriteMany PVs
 
-cd /opt/rook/cluster/examples/kubernetes/ceph/csi/rbd
-oc create -f storageclass.yaml
+    ```bash
+    cd /opt/rook/cluster/examples/kubernetes/ceph/csi/rbd
+    oc create -f storageclass.yaml
+    ```
 
-NOTE: Ceph rbd volumes are raw storage volumes. The storage class defines how the volume should be formatted after it is created. The default is ext4. If you would like something other than ext4 (e.g. xfs), modify the storage class to specify csi.storage.k8s.io/fstype: xfs.
+14. Check that your new storage class was created:
 
-Check that your new storage class was created:
+    ```bash
+    oc get sc
+    ```
 
-oc get sc
+15. Deploy the CephFS storage class for ReadWriteMany PVs. For our OCP 4.2.x deployment, we need one RWX volume to use for the image registry. We will deploy the only available filesystem PV for use by the image registry later in this document.
 
-Deploy the CephFS storage class for ReadWriteMany PVs.
+    ```bash
+    cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
+    oc create -f storageclass.yaml
+    oc get sc
+    ```
 
-IMPORTANT: Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one. This means that you can only deploy one single RWX PV using rook/CephFS. If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP. Doing so is outside of the scope of this document.
+16. Create a filesystem to be used by our image registry
 
-As of this writing, allowing multiple filesystems in rook/ceph is experimental and is thus possible, but doing so would not be production ready and so is outside the scope of this document.
+    ```bash
+    cd /opt/rook/cluster/examples/kubernetes/ceph
+    oc create -f filesystem.yaml
+    ```
 
-For our OCP 4.2 deployment, we need one RWX volume to use for the image registry. We will deploy the only available filesystem PV for use by the image registry later in this document.
+17. Wait for all pod to reach 'Running' state
 
-cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
-oc create -f storageclass.yaml
-oc get sc
+    ```bash
+    watch -n5 "oc get pods -n rook-ceph"
+    ```
 
-Create a filesystem to be used by our image registry
+18. Check Ceph cluster health:
 
-cd /opt/rook/cluster/examples/kubernetes/ceph
-oc create -f filesystem.yaml
+    ```bash
+    [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+    cluster:
+    id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
+    health: HEALTH_OK
 
-Wait for all pod to reach 'Running' state
+    services:
+    mon: 3 daemons, quorum a,b,c (age 34m)
+    mgr: a(active, since 4m)
+    mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+    osd: 3 osds: 3 up (since 32m), 3 in (since 32m)
 
-watch -n5 "oc get pods -n rook-ceph"
+    data:
+    pools:   10 pools, 80 pgs
+    objects: 37 objects, 4.4 KiB
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:     80 active+clean
 
-Check Ceph cluster health:
+    io:
+    client:   1.2 KiB/s rd, 0 B/s wr, 1 op/s rd, 0 op/s wr
+    ```
 
-[sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
-cluster:
-  id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
-  health: HEALTH_OK
+19. Go the the `/csi/rbd` and Create a PVC to be consumed by the image registry (pvc.yaml)
 
-services:
-  mon: 3 daemons, quorum a,b,c (age 34m)
-  mgr: a(active, since 4m)
-  mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
-  osd: 3 osds: 3 up (since 32m), 3 in (since 32m)
+    ```bash
+    cd /csi/rbd
+    vim pvc.yaml
+    ```
 
-data:
-  pools:   10 pools, 80 pgs
-  objects: 37 objects, 4.4 KiB
-  usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
-  pgs:     80 active+clean
+    ```bash
+    # pvc.yaml
+    ---
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: image-registry-storage
+    namespace: openshift-image-registry
+    spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+        requests:
+        storage: 100Gi
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: csi-cephfs
+    ```
 
-io:
-  client:   1.2 KiB/s rd, 0 B/s wr, 1 op/s rd, 0 op/s wr
+20. Deploy the PVC:
 
-Create a PVC to be consumed by the image registry (pvc.yaml)
-
-# pvc.yaml
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  finalizers:
-  - kubernetes.io/pvc-protection
-  name: image-registry-storage
-  namespace: openshift-image-registry
-spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 100Gi
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: csi-cephfs
-
-Deploy the PVC:
-
-oc create -f pvc.yaml
-
-See Appendix D for more information working with Ceph including useful commands.
+    ```bash
+    oc create -f pvc.yaml
+    ```
 
 ## Scaling up Nodes - in progress
 
