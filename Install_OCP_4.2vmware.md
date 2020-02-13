@@ -297,8 +297,9 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
 3. Now copy and paste the following settings for haproxy.cfg and insert the correct values for any `<brackets>`. Although I recommend inserting the values first and then copying. Also it's a good idea to backup the default haproxy.cfg
 
    ```bash
+   cd /etc/haproxy
    sudo cp haproxy.cfg haproxy.cfg.bak
-   sudo vim /etc/haproxy/haproxy.cfg
+   sudo vim haproxy.cfg
    ```
 
     <details>
