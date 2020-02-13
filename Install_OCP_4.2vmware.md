@@ -606,7 +606,7 @@ storage                                    4.2.16    True        False         F
     watch -n5 "oc get pods -n rook-ceph"
     ```
 
-7. Modify the cluster.yaml file for your environment. Note the actual file has a lot of comments for explanation and commented out blocks. You should look through them and you'll find most of the configs listed below. **Don't** just copy and paste the entire file as there might be new configs added to it by default from ceph developers.
+7. Modify the `cluster.yaml` file for your environment. Note the actual file has a lot of comments for explanation and commented out blocks. You should look through them and you'll find most of the configs listed below. **Don't** just copy and paste the entire file as there might be new configs added to it by default from ceph developers.
 
    ```bash
    apiVersion: ceph.rook.io/v1
@@ -692,7 +692,7 @@ storage                                    4.2.16    True        False         F
     oc create -f cluster.yaml
     ```
 
-9. Wait for all pods to enter 'Running' state
+9. Wait for all pods to enter `Running` state
 
     ```bash
     watch -n5 "oc get pods -n rook-ceph"
@@ -704,10 +704,10 @@ storage                                    4.2.16    True        False         F
     oc create -f toolbox.yaml
     ```
 
-11. It should take less than a minute to provision. Check with `oc get pods -n rook-ceph`. Check the health of the Ceph cluster. **Replace <> with the name of the rook-ceph-tools pod**
+11. It should take less than a minute to provision. Check with `oc get pods -n rook-ceph`. The `rook-ceph-tool-xyz` pod should be created. Check the health of the Ceph cluster. **Replace <> with the name of the rook-ceph-tools pod**
 
     ```bash
-    oc -n rook-ceph exec -it <rook-ceph-tools-******> -- /usr/bin/ceph -s
+    oc -n rook-ceph exec -it <rook-ceph-tools-xyz> -- /usr/bin/ceph -s
     ```
 
 12. Should return something like this:
@@ -769,28 +769,113 @@ storage                                    4.2.16    True        False         F
 18. Check Ceph cluster health:
 
     ```bash
-    [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+    $ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
     cluster:
-    id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
-    health: HEALTH_OK
+        id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+        health: HEALTH_OK
 
     services:
-    mon: 3 daemons, quorum a,b,c (age 34m)
-    mgr: a(active, since 4m)
-    mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
-    osd: 3 osds: 3 up (since 32m), 3 in (since 32m)
+        mon: 3 daemons, quorum a,b,c (age 20m)
+        mgr: a(active, since 19m)
+        mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+        osd: 3 osds: 3 up (since 18m), 3 in (since 18m)
 
     data:
-    pools:   10 pools, 80 pgs
-    objects: 37 objects, 4.4 KiB
-    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
-    pgs:     80 active+clean
+        pools:   3 pools, 80 pgs
+        objects: 22 objects, 2.2 KiB
+        usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+        pgs:     80 active+clean
 
     io:
-    client:   1.2 KiB/s rd, 0 B/s wr, 1 op/s rd, 0 op/s wr
+        client:   1.7 KiB/s rd, 3 op/s rd, 0 op/s wr
     ```
 
-19. Go the the `/csi/rbd` and Create a PVC to be consumed by the image registry (pvc.yaml)
+19. You might see the following warning (not error). As it's an error, you might ignore it but we'll fix it. If you don't get the warning, then move on to creating ```pvc.yaml```
+
+    ```bash
+    cluster:
+    id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+    health: HEALTH_WARN
+            too few PGs per OSD (24 < min 30)
+    ```
+
+20. To gain access to the rook/Ceph tools container use the following command. Run `oc get pods -n rook-ceph | grep tool` to get the name of you ceph toolbox pod. Use that name in the following command
+
+    ```bash
+    kubectl exec -it -n rook-ceph rook-ceph-tools-<pod specific string> -- bash
+    ```
+
+21. You can check the health of the cluster here by running `ceph -s`. You will see the same warning.
+
+    ```bash
+    bash-4.2$ ceph -s
+    cluster:
+        id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+        health: HEALTH_WARN
+                too few PGs per OSD (24 < min 30)
+
+    services:
+        mon: 3 daemons, quorum a,b,c (age 18m)
+        mgr: a(active, since 17m)
+        mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+        osd: 3 osds: 3 up (since 16m), 3 in (since 16m)
+
+    data:
+        pools:   3 pools, 24 pgs
+        objects: 22 objects, 2.2 KiB
+        usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+        pgs:     24 active+clean
+
+    io:
+        client:   853 B/s rd, 1 op/s rd, 0 op/s wr
+    ```
+
+22. First, list the pools you have in your ceph cluster by issuing the command `ceph osd lspools`. This will list all the pools in your cluster.
+
+    ```bash
+    bash-4.2$ ceph osd lspools
+    1 replicapool
+    2 myfs-metadata
+    3 myfs-data0
+    ```
+
+23. You might see `rbdpool` or `replicapool` or something else. But it should be a `pool`. You can increase the number of PGs for that pool to 64 by issuing the command:  
+
+    ```bash
+    bash-4.2$ ceph osd pool set replicapool pg_num 64
+    set pool 1 pg_num to 64
+
+    bash-4.2$ ceph osd pool set replicapool pgp_num 64
+    set pool 1 pgp_num to 64
+    ```
+
+24. Now chedck the cluester health again. The warning should go away.
+
+    ```bash
+    bash-4.2$ ceph -s
+    cluster:
+        id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+        health: HEALTH_OK
+
+    services:
+        mon: 3 daemons, quorum a,b,c (age 20m)
+        mgr: a(active, since 19m)
+        mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+        osd: 3 osds: 3 up (since 18m), 3 in (since 18m)
+
+    data:
+        pools:   3 pools, 80 pgs
+        objects: 22 objects, 2.2 KiB
+        usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+        pgs:     80 active+clean
+
+    io:
+        client:   1.7 KiB/s rd, 3 op/s rd, 0 op/s wr
+    ```
+
+    For more information about PGs and how to determine what this number should be see <https://docs.ceph.com/docs/master/rados/operations/placement-groups/>.
+
+25. Go the the `/csi/rbd` and Create a PVC to be consumed by the image registry (pvc.yaml)
 
     ```bash
     cd /csi/rbd
@@ -814,10 +899,10 @@ storage                                    4.2.16    True        False         F
         requests:
         storage: 100Gi
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: csi-cephfs
+    storageClassName: rook-cephfs
     ```
 
-20. Deploy the PVC:
+26. Deploy the PVC:
 
     ```bash
     oc create -f pvc.yaml
@@ -876,6 +961,7 @@ oc whoami
 
 
 oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-qwqxx -- /usr/bin/ceph -s
+kubectl exec -it -n rook-ceph rook-ceph-tools-7f9b9bfdb4-lcrkn -- bash
 ```
 
 #### Load Balancer
