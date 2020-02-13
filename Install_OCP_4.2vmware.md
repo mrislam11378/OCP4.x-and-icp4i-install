@@ -511,42 +511,306 @@ Watch the following command until all operators except for image-registry are av
 watch -n5 oc get clusteroperators
 ```
 
-When complete the output should look something like this:
+When complete the output should look something like this (**Note:** image-registry is not available at this point):
 
 **NOTE:** When installing OCP 4.3, the image-registry operator will automatically set to Removed so that the OCP installation will successfully complete. In OCP 4.2, you must configure persistent storage or configure the image-registry operator to not use persistent storage before the installation will complete.
 
 ```bash
-$ watch -n5 oc get clusteroperators
-
-NAME                                 VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
-authentication                       4.2.0     True        False         False      69s
-cloud-credential                     4.2.0     True        False         False      12m
-cluster-autoscaler                   4.2.0     True        False         False      11m
-console                              4.2.0     True        False         False      46s
-dns                                  4.2.0     True        False         False      11m
-image-registry                                 False       True          False      5m26s
-ingress                              4.2.0     True        False         False      5m36s
-kube-apiserver                       4.2.0     True        False         False      8m53s
-kube-controller-manager              4.2.0     True        False         False      7m24s
-kube-scheduler                       4.2.0     True        False         False      12m
-machine-api                          4.2.0     True        False         False      12m
-machine-config                       4.2.0     True        False         False      7m36s
-marketplace                          4.2.0     True        False         False      7m54m
-monitoring                           4.2.0     True        False         False      7h54s
-network                              4.2.0     True        False         False      5m9s
-node-tuning                          4.2.0     True        False         False      11m
-openshift-apiserver                  4.2.0     True        False         False      11m
-openshift-controller-manager         4.2.0     True        False         False      5m943s
-openshift-samples                    4.2.0     True        False         False      3m55s
-operator-lifecycle-manager           4.2.0     True        False         False      11m
-operator-lifecycle-manager-catalog   4.2.0     True        False         False      11m
-service-ca                           4.2.0     True        False         False      11m
-service-catalog-apiserver            4.2.0     True        False         False      5m26s
-service-catalog-controller-manager   4.2.0     True        False         False      5m25s
-storage                              4.2.0     True        False         False      5m30s
+$ oc get clusteroperators
+NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                             4.2.16    True        False         False      100m
+cloud-credential                           4.2.16    True        False         False      46h
+cluster-autoscaler                         4.2.16    True        False         False      46h
+console                                    4.2.16    True        False         False      101m
+dns                                        4.2.16    True        False         False      104m
+image-registry                             4.2.16    False        False         False      99m
+ingress                                    4.2.16    True        False         False      101m
+insights                                   4.2.16    True        False         False      46h
+kube-apiserver                             4.2.16    True        False         False      46h
+kube-controller-manager                    4.2.16    True        False         False      46h
+kube-scheduler                             4.2.16    True        False         False      46h
+machine-api                                4.2.16    True        False         False      46h
+machine-config                             4.2.16    True        False         False      46h
+marketplace                                4.2.16    True        False         False      103m
+monitoring                                 4.2.16    True        False         False      101m
+network                                    4.2.16    True        False         False      46h
+node-tuning                                4.2.16    True        False         False      104m
+openshift-apiserver                        4.2.16    True        False         False      19h
+openshift-controller-manager               4.2.16    True        False         False      46h
+openshift-samples                          4.2.16    True        False         False      46h
+operator-lifecycle-manager                 4.2.16    True        False         False      46h
+operator-lifecycle-manager-catalog         4.2.16    True        False         False      46h
+operator-lifecycle-manager-packageserver   4.2.16    True        False         False      104m
+service-ca                                 4.2.16    True        False         False      46h
+service-catalog-apiserver                  4.2.16    True        False         False      46h
+service-catalog-controller-manager         4.2.16    True        False         False      46h
+storage                                    4.2.16    True        False         False      46h
 ```
 
-## Configure Ceph Storage for the image-registry Operator
+## Configure Ceph Storage for the image-registry Operator - in progress
+
+**NOTE: These instructions should be carried out on the installation node.**
+
+1. Ensure that all the storage nodes are `Ready`
+
+    ```bash
+    $ oc get nodes
+    NAME              STATUS   ROLES    AGE   VERSION
+    compute1          Ready    worker   46h   v1.14.6+97c81d00e
+    compute2          Ready    worker   45h   v1.14.6+97c81d00e
+    compute3          Ready    worker   45h   v1.14.6+97c81d00e
+    compute4          Ready    worker   45h   v1.14.6+97c81d00e
+    compute5          Ready    worker   45h   v1.14.6+97c81d00e
+    compute6          Ready    worker   45h   v1.14.6+97c81d00e
+    compute7          Ready    worker   45h   v1.14.6+97c81d00e
+    compute8          Ready    worker   45h   v1.14.6+97c81d00e
+    control-plane-1   Ready    master   46h   v1.14.6+97c81d00e
+    control-plane-2   Ready    master   46h   v1.14.6+97c81d00e
+    control-plane-3   Ready    master   46h   v1.14.6+97c81d00e
+    storage1          Ready    worker   45h   v1.14.6+97c81d00e
+    storage2          Ready    worker   45h   v1.14.6+97c81d00e
+    storage3          Ready    worker   45h   v1.14.6+97c81d00e
+    ```
+
+2. Label storage nodes
+
+   ```bash
+    oc label node storage1 role=storage-node
+    oc label node storage2 role=storage-node
+    oc label node storage3 role=storage-node
+    ```
+
+3. Clone the rook project from github
+
+   ```bash
+   cd /opt
+   git clone https://github.com/rook/rook.git
+   ```
+
+4. You should now have a subdirectory under `/opt` named `rook`:
+
+    ```bash
+    cd /opt/rook/cluster/examples/kubernetes/ceph
+    ```
+
+5. Create the common and operator objects
+
+    ```bash
+    oc create -f common.yaml
+    oc create -f operator-openshift.yaml
+    ```
+
+6. Wait for all pods to enter the 'Running' state
+
+    ```bash
+    watch -n5 "oc get pods -n rook-ceph"
+    ```
+
+7. Modify the cluster.yaml file for your environment. Note the actual file has a lot of comments for explanation and commented out blocks. You should look through them and you'll find most of the configs listed below. **Don't** just copy and paste the entire file as there might be new configs added to it by default from ceph developers.
+
+   ```bash
+   apiVersion: ceph.rook.io/v1
+    kind: CephCluster
+    metadata:
+    name: rook-ceph
+    namespace: rook-ceph
+    spec:
+    cephVersion:
+        image: ceph/ceph:v14.2.5
+        allowUnsupported: false
+    dataDirHostPath: /var/lib/rook
+    skipUpgradeChecks: false
+    continueUpgradeAfterChecksEvenIfNotHealthy: false
+    mon:
+        count: 3
+        allowMultiplePerNode: false
+    dashboard:
+        enabled: true
+        ssl: true
+    monitoring:
+        enabled: true
+        rulesNamespace: rook-ceph
+    network:
+        hostNetwork: false
+    rbdMirroring:
+        workers: 0
+    placement:
+        all:
+        nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+                - key: role
+                operator: In
+                values:
+                - storage-node
+        podAffinity:
+        podAntiAffinity:
+        tolerations:
+        - key: storage-node
+            operator: Exists
+    annotations:
+    resources:
+        mgr:
+        limits:
+            cpu: "500m"
+            memory: "1024Mi"
+        requests:
+            cpu: "500m"
+            memory: "1024Mi"
+    removeOSDsIfOutAndSafeToRemove: false
+    storage: # cluster level storage configuration and selection
+        useAllNodes: false
+        useAllDevices: false
+        config:
+        nodes:
+        - name: "storage-0"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+            config:
+            osdsPerDevice: "1"
+        - name: "storage-1"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+            config:
+            osdsPerDevice: "1"
+        - name: "storage-2"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+            config:
+            osdsPerDevice: "1"
+    disruptionManagement:
+        managePodBudgets: false
+        osdMaintenanceTimeout: 30
+        manageMachineDisruptionBudgets: false
+        machineDisruptionBudgetNamespace: openshift-machine-api
+   ```
+
+8. Create the Ceph cluster
+
+    ```bash
+    oc create -f cluster.yaml
+    ```
+
+9. Wait for all pods to enter 'Running' state
+
+    ```bash
+    watch -n5 "oc get pods -n rook-ceph"
+    ```
+
+10. Create the Ceph toolbox pod to check cluster health
+
+    ```bash
+    oc create -f toolbox.yaml
+    ```
+
+11. It should take less than a minute to provision. Check with `oc get pods -n rook-ceph`. Check the health of the Ceph cluster. **Replace <> with the name of the rook-ceph-tools pod**
+
+    ```bash
+    oc -n rook-ceph exec -it <rook-ceph-tools-******> -- /usr/bin/ceph -s
+    ```
+
+12. Should return something like this:
+
+    ```bash
+    [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+    cluster:
+    id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
+    health: HEALTH_OK
+
+    services:
+    mon: 3 daemons, quorum a,b,c (age 13m)
+    mgr: a(active, since 12m)
+    osd: 3 osds: 3 up (since 11m), 3 in (since 11m)
+
+    data:
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:
+    ```
+
+    You now have a running Ceph cluster, provisioned by rook. You now need to configure OCP to consume it.
+
+Deploy the rbd storage class for non-ReadWriteMany PVs
+
+cd /opt/rook/cluster/examples/kubernetes/ceph/csi/rbd
+oc create -f storageclass.yaml
+
+NOTE: Ceph rbd volumes are raw storage volumes. The storage class defines how the volume should be formatted after it is created. The default is ext4. If you would like something other than ext4 (e.g. xfs), modify the storage class to specify csi.storage.k8s.io/fstype: xfs.
+
+Check that your new storage class was created:
+
+oc get sc
+
+Deploy the CephFS storage class for ReadWriteMany PVs.
+
+IMPORTANT: Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one. This means that you can only deploy one single RWX PV using rook/CephFS. If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP. Doing so is outside of the scope of this document.
+
+As of this writing, allowing multiple filesystems in rook/ceph is experimental and is thus possible, but doing so would not be production ready and so is outside the scope of this document.
+
+For our OCP 4.2 deployment, we need one RWX volume to use for the image registry. We will deploy the only available filesystem PV for use by the image registry later in this document.
+
+cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
+oc create -f storageclass.yaml
+oc get sc
+
+Create a filesystem to be used by our image registry
+
+cd /opt/rook/cluster/examples/kubernetes/ceph
+oc create -f filesystem.yaml
+
+Wait for all pod to reach 'Running' state
+
+watch -n5 "oc get pods -n rook-ceph"
+
+Check Ceph cluster health:
+
+[sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+cluster:
+  id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
+  health: HEALTH_OK
+
+services:
+  mon: 3 daemons, quorum a,b,c (age 34m)
+  mgr: a(active, since 4m)
+  mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+  osd: 3 osds: 3 up (since 32m), 3 in (since 32m)
+
+data:
+  pools:   10 pools, 80 pgs
+  objects: 37 objects, 4.4 KiB
+  usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+  pgs:     80 active+clean
+
+io:
+  client:   1.2 KiB/s rd, 0 B/s wr, 1 op/s rd, 0 op/s wr
+
+Create a PVC to be consumed by the image registry (pvc.yaml)
+
+# pvc.yaml
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  finalizers:
+  - kubernetes.io/pvc-protection
+  name: image-registry-storage
+  namespace: openshift-image-registry
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: csi-cephfs
+
+Deploy the PVC:
+
+oc create -f pvc.yaml
+
+See Appendix D for more information working with Ceph including useful commands.
 
 ## Scaling up Nodes - in progress
 
