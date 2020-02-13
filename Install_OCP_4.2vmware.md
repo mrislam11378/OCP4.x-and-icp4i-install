@@ -457,8 +457,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 
    ```bash
    export KUBECONFIG=/opt/mislam/auth/kubeconfig
-   oc whoami
-   system:admin
+   oc whoami # should return system:admin
    ```
 
 9. Make sure all the nodes(Control, Compute and Storage) are ready. If you see a node as `Not Ready` or is missing, you might need to approve the csr and wait.
@@ -1017,7 +1016,7 @@ INFO Login to the console with user: kubeadmin, password: *****-*****-*****-****
 
 Login to your new cluster as kubeadmin with the credentials output to the screen. If you lose that screen output, the same information can be found on your installation server in the `<projectdir>/auth/kubeadmin-password` file.
 
-## Scaling up Nodes - in progress
+## Scaling up Nodes
 
 To scale up a node, just Shut it down from vSphere. Then right click on the vm you want to modify, choose `Edit Settings`. Modify what you want and then turn it back up. That's it. Sometimes the node certs need to be approved. Check with `oc get csr`. Look at [Spinning up the cluster](#spinning-up-the-cluster) for more details.
 
@@ -1066,13 +1065,23 @@ cat worker.base64
 sudo apt update
 sudo apt install jq nmap
 
+# After configuring Load Balancer
 ./openshift-install --dir=./mislam wait-for bootstrap-complete --log-level info
 export KUBECONFIG=/opt/mislam/auth/kubeconfig
-oc whoami
+oc whoami #kube:admin
+oc get nodes
+oc get csr
+oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+oc get nodes #all nodes should be READY
+watch -n5 oc get clusteroperators # All operators should be READY except for image-registry
 
+# After setting up Ceph storage
+oc edit configs.imageregistry.operator.openshift.io
+watch -n5 oc get clusteroperators
 
-oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-qwqxx -- /usr/bin/ceph -s
-kubectl exec -it -n rook-ceph rook-ceph-tools-7f9b9bfdb4-lcrkn -- bash
+# After setting up image-registry
+cd /opt
+./openshift-install --dir=./vhavard wait-for install-complete
 ```
 
 #### Load Balancer
