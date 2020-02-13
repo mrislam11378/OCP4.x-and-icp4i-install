@@ -257,7 +257,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     ```
 
 18. Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
-    ![vApp Options](images/setIgnConfigData.png) </br>
+    ![vApp Options](images/setIgnConfig.png) </br>
 
 19. You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
     On your installation machine cat the text of append-bootstrap.b64 file to the screen:
