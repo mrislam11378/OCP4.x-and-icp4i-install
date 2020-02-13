@@ -410,7 +410,7 @@ That's it. Load Balancer in configured.
 
 Once the Installer Node and the Load balancer node is configured, it's time to turn on the nodes. Although theoretically all the nodes can be turned on at once, it's recommended not to do so. Here's what I found to be the best steps in case of a failed build.
 
-1. Turn on the Bootstrap node and wait for the IP address to resolve.
+1. Turn on the Bootstrap node and wait for the IP address to resolve (meaning the vm will have an assigned ip).
 2. SSH into the installer node and run the following command
 
    ```bash
