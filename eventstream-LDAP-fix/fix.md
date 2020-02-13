@@ -78,7 +78,7 @@ oc edit deployment es1-ibm-es-access-controller-deploy
 Search for `/image:` and look for the values with `access-control`
 Replace the image field value in with `image-registry.openshift-image-registry.svc:5000/eventstreams/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix`
 
-Run the fingers crossed and hope everything works. Otherwise ping rengan lol
+Run the command. fingers crossed and hope everything works. Otherwise ping rengan lol
 
 ```bash
 watch oc get pods

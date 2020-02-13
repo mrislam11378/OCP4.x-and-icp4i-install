@@ -201,7 +201,15 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
     ```
 
-14. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
+14. You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
+
+    ```bash
+    vim mislam/manifests//cluster-scheduler-02-config.yml
+    ```
+
+    This will make sure the cluster doesn't try to put your applications on master nodes. Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
+
+15. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
 
     ```bash
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
@@ -209,7 +217,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-15. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
+16. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
 **NOTE: Replace anything in [square brackets] with your values**
 
     <details>
@@ -587,6 +595,10 @@ sudo apt install jq nmap
 
 ./openshift-install --dir=./mislam wait-for bootstrap-complete --log-level info
 export KUBECONFIG=/opt/mislam/auth/kubeconfig
+oc whoami
+
+
+oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-qwqxx -- /usr/bin/ceph -s
 ```
 
 #### Load Balancer
@@ -746,6 +758,81 @@ backend https
     server  storage-0 <IP Address>:443 check
     server  storage-1 <IP Address>:443 check
     server  storage-2 <IP Address>:443 check
+```
+
+```bash
+  cluster:
+    id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 3m)
+    mgr: a(active, since 2m)
+    osd: 3 osds: 3 up (since 84s), 3 in (since 84s)
+
+  data:
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:
+
+kubectl exec -it -n rook-ceph rook-ceph-tools-7f9b9bfdb4-qwqxx -- bash
+
+bash-4.2$ ceph -s
+  cluster:
+    id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+    health: HEALTH_WARN
+            too few PGs per OSD (24 < min 30)
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 18m)
+    mgr: a(active, since 17m)
+    mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+    osd: 3 osds: 3 up (since 16m), 3 in (since 16m)
+
+  data:
+    pools:   3 pools, 24 pgs
+    objects: 22 objects, 2.2 KiB
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:     24 active+clean
+
+  io:
+    client:   853 B/s rd, 1 op/s rd, 0 op/s wr
+
+
+bash-4.2$ ceph osd lspools
+1 replicapool
+2 myfs-metadata
+3 myfs-data0
+
+bash-4.2$ ceph osd pool set replicapool pg_num 64
+set pool 1 pg_num to 64
+bash-4.2$ ceph osd pool set replicapool pgp_num 64
+set pool 1 pgp_num to 64
+
+bash-4.2$ ceph -s
+  cluster:
+    id:     9c3dbf33-4a7c-4374-bf2a-8241b7e24c0b
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 20m)
+    mgr: a(active, since 19m)
+    mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+    osd: 3 osds: 3 up (since 18m), 3 in (since 18m)
+
+  data:
+    pools:   3 pools, 80 pgs
+    objects: 22 objects, 2.2 KiB
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:     80 active+clean
+
+  io:
+    client:   1.7 KiB/s rd, 3 op/s rd, 0 op/s wr
+
+sysadmin@ocp42install:/opt/rook/cluster/examples/kubernetes/ceph/csi/rbd$ oc get pvc --all-namespaces
+NAMESPACE                  NAME                     STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+openshift-image-registry   image-registry-storage   Bound    pvc-ec0cf7c0-4d47-11ea-8b52-005056a5d33b   100Gi      RWX            rook-cephfs    2m21s
 ```
 
 ## FAQ
