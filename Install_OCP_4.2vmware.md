@@ -444,7 +444,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 6. If we look at the logs in the `install node` (step 1), we should see this within 30 minutes.
 
    ```bash
-   INFO Waiting up to 30m0s for the Kubernetes API at https://api.vhavard.ocp.csplab.local:6443...
+   INFO Waiting up to 30m0s for the Kubernetes API at https://api.mislam.ocp.csplab.local:6443...
    INFO API v1.13.4+c2a5caf up
    INFO Waiting up to 30m0s for bootstrapping to complete...
    INFO It is now safe to remove the bootstrap resources
@@ -456,7 +456,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 8. From the install node it's time to **Login to the OCP Cluster**. Run the following command.
 
    ```bash
-   export KUBECONFIG=/opt/vhavard/auth/kubeconfig
+   export KUBECONFIG=/opt/mislam/auth/kubeconfig
    oc whoami
    system:admin
    ```
@@ -488,7 +488,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 If all nodes are in ready status, you should see something similar depending on the number of nodes
 
 ```bash
-sysadmin@ocp42install:~$ oc get nodes
+$ oc get nodes
 NAME              STATUS   ROLES    AGE   VERSION
 compute-0         Ready    worker   20m   v1.14.6+8e46c0036
 compute-1         Ready    worker   20m   v1.14.6+8e46c0036
@@ -547,7 +547,7 @@ service-catalog-controller-manager         4.2.16    True        False         F
 storage                                    4.2.16    True        False         False      46h
 ```
 
-## Configure Ceph Storage for the image-registry Operator - in progress
+## Configure Ceph Storage for the image-registry Operator
 
 **NOTE: These instructions should be carried out on the installation node.**
 
@@ -718,7 +718,7 @@ storage                                    4.2.16    True        False         F
 12. Should return something like this:
 
     ```bash
-    [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+    $ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
     cluster:
     id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
     health: HEALTH_OK
@@ -996,7 +996,30 @@ storage                                    4.2.16    True        False         F
 
 ## Ensure the Cluster is up and ready
 
+To complete your installation run the following command. When the installation is complete it will output the credentials for the initial login to your new cluster.
+
+```bash
+cd /opt
+./openshift-install --dir=./mislam wait-for install-complete
+```
+
+The output should look something like this:
+
+```bash
+$ ./openshift-install --dir=./mislam wait-for install-complete
+INFO Waiting up to 30m0s for the cluster at https://api.mislam.ocp.csplab.local:6443 to initialize...
+INFO Waiting up to 10m0s for the openshift-console route to be created...
+INFO Install complete!
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/opt/mislam/auth/kubeconfig'
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.mislam.ocp.csplab.local
+INFO Login to the console with user: kubeadmin, password: *****-*****-*****-*****
+```
+
+Login to your new cluster as kubeadmin with the credentials output to the screen. If you lose that screen output, the same information can be found on your installation server in the `<projectdir>/auth/kubeadmin-password` file.
+
 ## Scaling up Nodes - in progress
+
+To scale up a node, just Shut it down from vSphere. Then right click on the vm you want to modify, choose `Edit Settings`. Modify what you want and then turn it back up. That's it. Sometimes the node certs need to be approved. Check with `oc get csr`. Look at [Spinning up the cluster](#spinning-up-the-cluster) for more details.
 
 ## Scaling out Cluster (Adding worker nodes) - in progress
 
@@ -1283,7 +1306,7 @@ bash-4.2$ ceph -s
   io:
     client:   1.7 KiB/s rd, 3 op/s rd, 0 op/s wr
 
-sysadmin@ocp42install:/opt/rook/cluster/examples/kubernetes/ceph/csi/rbd$ oc get pvc --all-namespaces
+$ oc get pvc --all-namespaces
 NAMESPACE                  NAME                     STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 openshift-image-registry   image-registry-storage   Bound    pvc-ec0cf7c0-4d47-11ea-8b52-005056a5d33b   100Gi      RWX            rook-cephfs    2m21s
 ```
