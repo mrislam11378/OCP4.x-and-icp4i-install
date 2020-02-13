@@ -607,43 +607,43 @@ storage                                    4.2.16    True        False         F
     ```
 
 7. Modify the `cluster.yaml` file for your environment. Note the actual file has a lot of comments for explanation and commented out blocks. You should look through them and you'll find most of the configs listed below. **Don't** just copy and paste the entire file as there might be new configs added to it by default from ceph developers.
-    
+
     <details>
     <summary> Show cluster.yaml </summary>
 
-    ```bash
-    apiVersion: ceph.rook.io/v1
-        kind: CephCluster
-        metadata:
+    ```yaml
+      apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      metadata:
         name: rook-ceph
         namespace: rook-ceph
-        spec:
+      spec:
         cephVersion:
-            image: ceph/ceph:v14.2.5
-            allowUnsupported: false
+          image: ceph/ceph:v14.2.5
+          allowUnsupported: false
         dataDirHostPath: /var/lib/rook
         skipUpgradeChecks: false
         continueUpgradeAfterChecksEvenIfNotHealthy: false
         mon:
-            count: 3
-            allowMultiplePerNode: false
+          count: 3
+          allowMultiplePerNode: false
         dashboard:
-            enabled: true
-            ssl: true
+          enabled: true
+          ssl: true
         monitoring:
-            enabled: true
-            rulesNamespace: rook-ceph
+          enabled: true
+          rulesNamespace: rook-ceph
         network:
-            hostNetwork: false
+          hostNetwork: false
         rbdMirroring:
-            workers: 0
+          workers: 0
         placement:
-            all:
+          all:
             nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
+              requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                 - matchExpressions:
-                    - key: role
+                  - key: role
                     operator: In
                     values:
                     - storage-node
@@ -651,43 +651,43 @@ storage                                    4.2.16    True        False         F
             podAntiAffinity:
             tolerations:
             - key: storage-node
-                operator: Exists
+              operator: Exists
         annotations:
         resources:
-            mgr:
+          mgr:
             limits:
-                cpu: "500m"
-                memory: "1024Mi"
+              cpu: "500m"
+              memory: "1024Mi"
             requests:
-                cpu: "500m"
-                memory: "1024Mi"
+              cpu: "500m"
+              memory: "1024Mi"
         removeOSDsIfOutAndSafeToRemove: false
         storage: # cluster level storage configuration and selection
-            useAllNodes: false
-            useAllDevices: false
-            config:
-            nodes:
-            - name: "storage-0"
+          useAllNodes: false
+          useAllDevices: false
+          config:
+          nodes:
+          - name: "storage-0"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
-                config:
+              config:
                 osdsPerDevice: "1"
-            - name: "storage-1"
+          - name: "storage-1"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
-                config:
+              config:
                 osdsPerDevice: "1"
-            - name: "storage-2"
+          - name: "storage-2"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
-                config:
+              config:
                 osdsPerDevice: "1"
         disruptionManagement:
-            managePodBudgets: false
-            osdMaintenanceTimeout: 30
-            manageMachineDisruptionBudgets: false
-            machineDisruptionBudgetNamespace: openshift-machine-api
-        ```
+          managePodBudgets: false
+          osdMaintenanceTimeout: 30
+          manageMachineDisruptionBudgets: false
+          machineDisruptionBudgetNamespace: openshift-machine-api
+      ```
 
     </details>
 
@@ -890,23 +890,23 @@ storage                                    4.2.16    True        False         F
     <details>
     <summary> Show pvc.yaml</summary>
 
-    ```bash
+    ```yaml
     ---
     apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
-    finalizers:
-    - kubernetes.io/pvc-protection
-    name: image-registry-storage
-    namespace: openshift-image-registry
+        finalizers:
+        - kubernetes.io/pvc-protection
+        name: image-registry-storage
+        namespace: openshift-image-registry
     spec:
-    accessModes:
-    - ReadWriteMany
-    resources:
+        accessModes:
+        - ReadWriteMany
+        resources:
         requests:
-        storage: 100Gi
-    persistentVolumeReclaimPolicy: Retain
-    storageClassName: rook-cephfs
+            storage: 100Gi
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: csi-cephfs
     ```
 
     </details>
@@ -916,6 +916,85 @@ storage                                    4.2.16    True        False         F
     ```bash
     oc create -f pvc.yaml
     ```
+
+## Configure image-registry
+
+1. Configure the image-registry operator to use persistent storage
+
+    ```bash
+    oc edit configs.imageregistry.operator.openshift.io
+    ```
+
+2. Add `pvc: claim:` in `storage`. Leave the value of claim blank. OpenShift will auto populate it. The result should look something like this:
+
+    ```yaml
+    spec:
+        defaultRoute: false
+        httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
+        logging: 2
+        managementState: Managed
+        proxy:
+        http: ""
+        https: ""
+        noProxy: ""
+        readOnly: false
+        replicas: 1
+        requests:
+        read:
+            maxInQueue: 0
+            maxRunning: 0
+            maxWaitInQueue: 0s
+        write:
+            maxInQueue: 0
+            maxRunning: 0
+            maxWaitInQueue: 0s
+        storage:
+        pvc:
+            claim:
+    ```
+
+3. When this is complete, recheck your clusteroperator status to make sure the status becomes available.
+
+    ```bash
+    watch -n5 oc get clusteroperators
+    ```
+
+    After a minute or two all operators should show available including the images registry
+
+    ```bash
+    Every 2.0s: oc get clusteroperators                                                           Wed Feb 12 21:11:42 2020
+
+    NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+    authentication                             4.2.16    True        False         False      3h40m
+    cloud-credential                           4.2.16    True        False         False      2d
+    cluster-autoscaler                         4.2.16    True        False         False      2d
+    console                                    4.2.16    True        False         False      3h41m
+    dns                                        4.2.16    True        False         False      3h44m
+    image-registry                             4.2.16    True        False         False      3h38m
+    ingress                                    4.2.16    True        False         False      3h41m
+    insights                                   4.2.16    True        False         False      2d
+    kube-apiserver                             4.2.16    True        False         False      2d
+    kube-controller-manager                    4.2.16    True        False         False      2d
+    kube-scheduler                             4.2.16    True        False         False      2d
+    machine-api                                4.2.16    True        False         False      2d
+    machine-config                             4.2.16    True        False         False      2d
+    marketplace                                4.2.16    True        False         False      3h43m
+    monitoring                                 4.2.16    True        False         False      3h41m
+    network                                    4.2.16    True        False         False      2d
+    node-tuning                                4.2.16    True        False         False      3h44m
+    openshift-apiserver                        4.2.16    True        False         False      21h
+    openshift-controller-manager               4.2.16    True        False         False      2d
+    openshift-samples                          4.2.16    True        False         False      2d
+    operator-lifecycle-manager                 4.2.16    True        False         False      2d
+    operator-lifecycle-manager-catalog         4.2.16    True        False         False      2d
+    operator-lifecycle-manager-packageserver   4.2.16    True        False         False      3h44m
+    service-ca                                 4.2.16    True        False         False      2d
+    service-catalog-apiserver                  4.2.16    True        False         False      2d
+    service-catalog-controller-manager         4.2.16    True        False         False      2d
+    storage                                    4.2.16    True        False         False      2d
+    ```
+
+## Ensure the Cluster is up and ready
 
 ## Scaling up Nodes - in progress
 
@@ -1131,6 +1210,8 @@ backend https
     server  storage-1 <IP Address>:443 check
     server  storage-2 <IP Address>:443 check
 ```
+
+Too few `PG`
 
 ```bash
   cluster:
