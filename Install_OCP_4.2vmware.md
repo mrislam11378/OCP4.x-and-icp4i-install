@@ -400,8 +400,18 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
       ```
   
     </details>
+4. Check the status of `haproxy`. It'll probably be dead initially.
 
-4. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up every time the load balancer restarts.
+   ```bash
+   $ sudo systemctl status haproxy
+    ● haproxy.service - HAProxy Load Balancer
+    Loaded: loaded (/lib/systemd/system/haproxy.service; disabled; vendor preset: enabled)
+    Active: inactive (dead)
+        Docs: man:haproxy(1)
+            file:/usr/share/doc/haproxy/configuration.txt.gz
+   ```
+
+5. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up every time the load balancer restarts. If `haproxy` was not dead in the last step, use `restart` instead of start.
 
     ```bash
     sudo systemctl start haproxy  #if already running, try systemctl restart. To check status, do systemctl status
