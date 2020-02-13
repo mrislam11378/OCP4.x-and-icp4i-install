@@ -80,6 +80,7 @@ CP4D|8| | | |
 Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX->FastStart2020Templates` but the location might change in the future.
 
 1. ssh into the Install Node. You need root access to complete most of the steps so ensure that's possible.
+**NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     ```bash
     ssh sysadmin@[IP address of installer]
@@ -132,7 +133,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
    ssh-keygen -t rsa -b 4096 -N ''
    ```
 
-9. Start the ssh agent
+9.  Start the ssh agent
 
     ```bash
     eval "$(ssh-agent -s )"
@@ -151,7 +152,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     ```
 
 12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
-**NOTE: Replace anything in [square brackets] with your values**
+**NOTE: Replace anything in [square brackets] with your values and remove the brackets**
   
     <details> 
     <summary> Show install-config.yaml </summary>
@@ -194,14 +195,14 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         cp install-config.yaml /opt/install-config.yaml.bak
     ```
 
-13. Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
+1.  Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
 
     ```bash
     cd /opt
     ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
     ```
 
-14. You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
+2.  You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
 
     ```bash
     vim mislam/manifests//cluster-scheduler-02-config.yml
@@ -209,7 +210,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will make sure the cluster doesn't try to put your applications on master nodes. Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
 
-15. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
+3.  Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
 
     ```bash
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
@@ -217,8 +218,8 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-16. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
-**NOTE: Replace anything in [square brackets] with your values**
+4.  In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
+**NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     <details>
     <summary> Show append-bootstrap.ign </summary>
@@ -280,6 +281,7 @@ sudo apt install jq nmap
 Use `ocp42-lb-template` as template. Same location as the installer template. We will only configure 1 load balancer but in production environment it is strongly recommended to have 2. Also ensure you have gotten assigned ip addresses for each of your nodes before progressing as they will be necessary.
 
 1. In vSphere, turn on the load balancer. Then from the install node, ssh into the load balancer.
+**NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
    ```bash
    ssh sysadmin@[ip address of load balancer]
