@@ -133,7 +133,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
    ssh-keygen -t rsa -b 4096 -N ''
    ```
 
-9.  Start the ssh agent
+9. Start the ssh agent
 
     ```bash
     eval "$(ssh-agent -s )"
@@ -154,7 +154,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 12. In your project directory (`/opt/mislam`), create a file named `install-config.yaml` and paste the following configs.
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
   
-    <details> 
+    <details>
     <summary> Show install-config.yaml </summary>
 
       ```bash
@@ -195,22 +195,22 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         cp install-config.yaml /opt/install-config.yaml.bak
     ```
 
-1.  Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
+13. Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
 
     ```bash
     cd /opt
     ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
     ```
 
-2.  You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
+14. You will need to edit `manifests/cluster-scheduler-02-config.yml` file and change the value of `spec.mastersSchedulable` to `false`.
 
     ```bash
-    vim mislam/manifests//cluster-scheduler-02-config.yml
+    vim mislam/manifests/cluster-scheduler-02-config.yml
     ```
 
     This will make sure the cluster doesn't try to put your applications on master nodes. Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
 
-3.  Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
+15. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
 
     ```bash
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
@@ -218,7 +218,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-4.  In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
+16. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents.
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     <details>
@@ -247,7 +247,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     </details>
 
-16. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
+17. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
 
     ```bash
     cd /opt/mislam
@@ -256,18 +256,19 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     base64 -w0 worker.ign > worker.base64
     ```
 
-17. Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
+18. Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
     ![vApp Options](images/setIgnConfigData.png) </br>
 
-18. You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
+19. You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
     On your installation machine cat the text of append-bootstrap.b64 file to the screen:
   
     ```bash
     cat append-bootstrap.base64
     ```
 
-19. Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
-20. Repeat these steps for each node in your cluster. For the `master/control nodes` use the `master.base64` ignition file and for the `compute/worker nodes` use the `worker.base64` text.
+20. Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
+
+21. Repeat these steps for each node in your cluster. For the `master/control nodes` use the `master.base64` ignition file and for the `compute/worker nodes` use the `worker.base64` text.
 
 Now you have set up your install node. But before moving on some packages should be installed for future steps.
 
@@ -399,7 +400,7 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
   
     </details>
 
-4. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up everytime the load balancer restarts.
+4. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up every time the load balancer restarts.
 
     ```bash
     sudo systemctl start haproxy  #if already running, try systemctl restart. To check status, do systemctl status
@@ -481,7 +482,7 @@ Once the Installer Node and the Load balancer node is configured, it's time to t
 12. It's likely that you might see a lot of CSR depending on the number of compute/storage nodes. Run the following command to approve all. Install `jq` if not installed. `sudo apt install jq`
 
     ```bash
-    oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+    oc get csr -o json | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
     ```
 
 If all nodes are in ready status, you should see something similar depending on the number of nodes
@@ -853,7 +854,7 @@ storage                                    4.2.16    True        False         F
     set pool 1 pgp_num to 64
     ```
 
-24. Now chedck the cluester health again. The warning should go away.
+24. Now check the cluster health again. The warning should go away.
 
     ```bash
     bash-4.2$ ceph -s
@@ -1071,7 +1072,7 @@ export KUBECONFIG=/opt/mislam/auth/kubeconfig
 oc whoami #kube:admin
 oc get nodes
 oc get csr
-oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+oc get csr -o json | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
 oc get nodes #all nodes should be READY
 watch -n5 oc get clusteroperators # All operators should be READY except for image-registry
 
@@ -1081,7 +1082,7 @@ watch -n5 oc get clusteroperators
 
 # After setting up image-registry
 cd /opt
-./openshift-install --dir=./vhavard wait-for install-complete
+./openshift-install --dir=./mislam wait-for install-complete
 ```
 
 #### Load Balancer
