@@ -192,7 +192,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     **NOTE:** It is recommended to make a backup of the `install-config.yaml` file as it will be deleted during manifests creation. I create the backup in the /opt directory rather than the project directory but feel free to have it somewhere else.
 
     ```bash
-        cp install-config.yaml /opt/install-config.yaml.bak
+    cp install-config.yaml /opt/install-config.yaml.bak
     ```
 
 1.  Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
@@ -226,22 +226,22 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
       ```bash
       {
-      "ignition": {
-          "config": {
-          "append": [
-              {
-              "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
-              "verification": {}
-              }
-          ]
-          },
-          "timeouts": {},
-          "version": "2.1.0"
-      },
-      "networkd": {},
-      "passwd": {},
-      "storage": {},
-      "systemd": {}
+        "ignition": {
+            "config": {
+            "append": [
+                {
+                "source": "[http://172.18.6.67/mislam/bootstrap.ign]",
+                "verification": {}
+                }
+            ]
+            },
+            "timeouts": {},
+            "version": "2.1.0"
+        },
+        "networkd": {},
+        "passwd": {},
+        "storage": {},
+        "systemd": {}
       }
       ```
 
