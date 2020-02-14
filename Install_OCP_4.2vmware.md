@@ -162,19 +162,19 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
       baseDomain: ocp.csplab.local
       compute:
       - hyperthreading: Enabled
-      name: worker
-      replicas: 0
+        name: worker
+        replicas: 0
       controlPlane:
-      hyperthreading: Enabled
-      name: master
-      replicas: 3
+        hyperthreading: Enabled
+        name: master
+        replicas: 3
       metadata:
-      name: [name of your cluster] # in my case mislam as I create /mislam inside of /opt
+        name: mislam
       platform:
-      vsphere:
+        vsphere:
           vcenter: demo-vcenter.csplab.local
-          username: [Muhammad.Islam] # my vSphere username i.e. the login used for vSphere
-          password: [********] # your password
+          username: Muhammad.Islam
+          password: xY0mwGM9nD=2*H41#J
           datacenter: CSPLAB
           defaultDatastore: SANDBOX_TIER4
       pullSecret: '[your pull secret. Dont forget the single quotes]'
@@ -195,14 +195,14 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         cp install-config.yaml /opt/install-config.yaml.bak
     ```
 
-13. Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
+1.  Now it's time to create your manifest files. Go back to `/opt` dir and run the following command. This will create the manifest files inside your project directory (`/mislam` for me). Make sure to **backup** your `install-config.yaml` before creating your manifests if you want to save the config.
 
     ```bash
     cd /opt
     ./openshift-install create manifests --dir=./mislam  # replace --dir=[contents] with your project dir
     ```
 
-14. You will need to edit `manifests/cluster-scheduler-02-config.yml` file and change the value of `spec.mastersSchedulable` to `false`.
+2.  You will need to edit `manifests/cluster-scheduler-02-config.yml` file and change the value of `spec.mastersSchedulable` to `false`.
 
     ```bash
     vim mislam/manifests/cluster-scheduler-02-config.yml
@@ -210,7 +210,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will make sure the cluster doesn't try to put your applications on master nodes. Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
 
-15. Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
+3.  Now we will create the ignition files. Run the following command from `/opt`. This will **consume** all your manifests file so you might want to create backups.
 
     ```bash
     ./openshift-install create ignition-configs --dir=./mislam # replace --dir=[contents] with your project dir
@@ -218,7 +218,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-16. In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `https://<install node IP>/<cluster name>/bootstrap.ign`
+4.  In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `https://<install node IP>/<cluster name>/bootstrap.ign`
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     <details>

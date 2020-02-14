@@ -48,14 +48,14 @@ while true;
 ```bash
 ## docker tag <old image name:TAG> <new image name:TAG>
 docker tag  hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/icp-identity-provider-amd64:727dfef  default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/icp-identity-provider-amd64:727dfef
-docker tag  hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/common-web-ui-amd64:1.1.0-e3cb15     default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/common-web-ui-amd64:1.1.0-e3cb15
-docker tag  hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/icp-identity-manager-amd64:d11b984   default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/icp-identity-manager-amd64:d11b984
+docker tag  hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/common-web-ui-amd64:1.1.0-e3cb15     default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local:5000/kube-system/common-web-ui-amd64:1.1.0-e3cb15
+docker tag  hyc-cloud-private-scratch-docker-local.artifactory.swg-devops.com/ibmcom/icp-identity-manager-amd64:d11b984   default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local:5000/kube-system/icp-identity-manager-amd64:d11b984
 docker tag  mycluster.icp:8500/es/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix                 image-registry.openshift-image-registry.svc:5000/eventstreams/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix
 
 # Probably don't need this
 docker tag  mycluster.icp:8500/es/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix                 default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/eventstreams/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix
 
-docker push default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/icp-identity-provider-amd64:727dfef
+docker push default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local:5000/kube-system/icp-identity-provider-amd64:727dfef
 docker push default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/common-web-ui-amd64:1.1.0-e3cb15
 docker push default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.local/kube-system/icp-identity-manager-amd64:d11b984
 docker push image-registry.openshift-image-registry.svc:5000/eventstreams/eventstreams-access-controller-ce-icp-linux-amd64:2019-12-17.30.00-ifix
@@ -69,6 +69,19 @@ docker push default-route-openshift-image-registry.apps.res-cp4i.ocp.csplab.loca
 ```bash
 oc project eventstreams
 oc get deployment
+
+deployer-dockercfg-ptgfs
+oc get is
+oc get is -n kube-system
+oc project
+oc project kube-system
+oc get deamonset
+oc get daemonset
+sudo docker images
+oc get secrets
+oc get secrets | grep deployer
+oc edit daemonset common-web-ui
+exit
 ```
 
 ```bash
