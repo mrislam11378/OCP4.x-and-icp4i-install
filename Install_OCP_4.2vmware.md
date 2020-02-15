@@ -38,7 +38,6 @@ This document shows step by step guide for installing [OpenShift 4.2](https://do
 Below are some recommendations that should be followed.
 
 - Create all the VMs in vSphere and note the mac addresses.
-- The VM "Network Adapter" should be assigned to ocp
 - Thin Provision hard disks except the install node.
 - Have IP addresses assigned to each of the vm (DNS & DHCP already configured)
 - Only turn on the install node and load balancer until all the configs are done, check if proper IP address is assigned. If not
@@ -49,21 +48,22 @@ Below are some recommendations that should be followed.
 
 ## Common mistakes
 
-- The resource pool, folder name in vSphere and route base (xx.$USER.ocp.csplab.local), the user folder inside /opt MUST match
-- Anywhere you see a [square brackets], replace the contents along with the brackets and paste in your content
-- Do not turn on the master, worker, storage nodes untill all the configs will done in the install node and load balancer.
+- The VM `Network Adapter` should be assigned to `ocp`
+- The `resource pool`, `folder` name in vSphere and `route base` (xx.$USER.ocp.csplab.local), the user folder inside `/opt` **MUST** match.
+- Anywhere you see a **[square brackets]**, replace the contents along with the brackets and paste in your content
+- Do **NOT** turn on the master, worker, storage nodes untill all the configs will done in the install node and load balancer.
 
 ## Cluster Configuration
 
-**Node Type**|**Number of Nodes**|**CPU**|**RAM**|**DISK**|**DISK2**
-:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
-Master|3|16|64|300|
-Worker|8|4|16|200|
-Storage|3|4|16|200|500
-Bootstrap|1|4|16|100|
-Install|1|4|16|200|
-LB|1|4|16|120|
-NFS|1|2|8|500|
+**Node Type**|**Number of Nodes**|**CPU**|**RAM**|**DISK**|**DISK2**|**Template**
+:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
+Master|3|16|64|300| | rhcos-4.2.0-x86_64-vmware-template |
+Worker|8|4|16|200| | rhcos-4.2.0-x86_64-vmware-template |
+Storage|3|4|16|200|500 | rhcos-4.2.0-x86_64-vmware-template |
+Bootstrap|1|4|16|100| | rhcos-4.2.0-x86_64-vmware-template |
+Install|1|4|16|200| | ocp42-installer-template |
+LB|1|4|16|120| | ocp42-lb-template |
+NFS|1|2|8|500|  | nfs-server-template |
 
 **Note:** For installing could pak the workers might need to be scaled up. Common Configs:
 
@@ -75,11 +75,32 @@ CP4Auto|8| | | |
 CP4MCM|8| | | |
 CP4D|8| | | |
 
+## Creating the VMs in vSphere
+
+Using the specs above (assuming you're not installing any Cloud Pak), we'll now create the vms. Follow [Cloud Adoption Lab](https://csplab.dfw.ibm.com/) `Left Tab -> Gaining Access to the Lab (VPN) -> Mac Users` to setup `Tunnelblick`
+
+1. Go to vSphere, login using your csplab credentials. **Remember** to have Tunnelblick connected. If you have to use both Cisco AnyConnect and Tunnelblick, make the connection with Tunnelblick first then connect with AnyConnect. Also depending on your location, make sure to have the correct vpn config file (Internal or External).
+2. Switch to the folder view (Second tab on the left panel). Go to your cluster folder (`mislam` in my case). Right click on the folder, select New Virtual Machine.
+3. Select `Deploy from Template`, switch to `Data Center` tab. Follow `CSPLAB -> Sandbox -> FastStart2020Templates`
+4. Select the correct template ( look at the [Cluster Configuration](#cluster-configuration) ). Hit `NEXT`
+5. Select you cluster `folder`, select your cluster `Resource Group`.
+6. Select `SANDBOX_TIER4` for storage, remember this as you'll need this when creating your `install-config.yaml`. Hit next.
+7. Choose `Customize this virtual machine's hardware`, hit next.
+8. Select the correct `CPU`, `Memory` and `Hard disk` values by following the [Cluster Configuration](#cluster-configuration).
+9. **REMEMBER TO THIN PROVISION THE HARD DRIVES** You'll see the type if you expand Hard disk.
+10. For `Network adapter 1` be sure to switch to OCP. `Drop Down -> Browse -> OCP`.
+11. If you want to manually assign `MAC Addresses`, select `Manual` from the `MAC Address` drop down and paste your mac address.
+12. If you see Network adapter 2, delete it.
+13. That should be all, hit next and finish creating your vm.
+
+**Note:** Do **NOT** turn on your VMs until instructed. If you do, you've to delete them and recreate them.
+**NOTE: Please be a Good Datacenter Citizen**. Read through `Being a Good Datacenter Citizen` from [Cloud Adoption Lab](https://csplab.dfw.ibm.com/) if this is your first time making the cluster.
+
 ## Setting up Install Node
 
 Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX->FastStart2020Templates` but the location might change in the future.
 
-1. ssh into the Install Node. You need root access to complete most of the steps so ensure that's possible.
+1. In vSphere, turn on the `installer` vm. Then from your mac terminal, ssh into the `installer`. You need root access to complete most of the steps so ensure that's possible.
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     ```bash
@@ -411,7 +432,7 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
             file:/usr/share/doc/haproxy/configuration.txt.gz
    ```
 
-5. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up every time the load balancer restarts. If `haproxy` was not dead in the last step, use `restart` instead of start.
+5. Now start `haproxy`. Also should do `systemctl enable haproxy` so that it starts up every time the load balancer restarts. If `haproxy` was not dead in the last step, use `restart` instead of `start`.
 
     ```bash
     sudo systemctl start haproxy  #if already running, try systemctl restart. To check status, do systemctl status
