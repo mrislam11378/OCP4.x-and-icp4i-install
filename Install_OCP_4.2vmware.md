@@ -961,28 +961,28 @@ storage                                    4.2.16    True        False         F
 
     ```yaml
     spec:
-        defaultRoute: false
-        httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
-        logging: 2
-        managementState: Managed
-        proxy:
-          http: ""
-          https: ""
-          noProxy: ""
-        readOnly: false
-        replicas: 1
-        requests:
-          read:
-            maxInQueue: 0
-            maxRunning: 0
-            maxWaitInQueue: 0s
-          write:
-            maxInQueue: 0
-            maxRunning: 0
-            maxWaitInQueue: 0s
-        storage:
-          pvc:
-            claim:
+      defaultRoute: false
+      httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
+      logging: 2
+      managementState: Managed
+      proxy:
+        http: ""
+        https: ""
+        noProxy: ""
+      readOnly: false
+      replicas: 1
+      requests:
+        read:
+          maxInQueue: 0
+          maxRunning: 0
+          maxWaitInQueue: 0s
+        write:
+          maxInQueue: 0
+          maxRunning: 0
+          maxWaitInQueue: 0s
+      storage:
+        pvc:
+          claim:
     ```
 
 3. When this is complete, recheck your clusteroperator status to make sure the status becomes available.
