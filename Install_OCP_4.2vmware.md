@@ -938,7 +938,7 @@ storage                                    4.2.16    True        False         F
           requests:
             storage: 100Gi
         persistentVolumeReclaimPolicy: Retain
-        storageClassName: csi-cephfs
+        storageClassName: rook-cephfs
     ```
 
     </details>
