@@ -957,7 +957,7 @@ storage                                    4.2.16    True        False         F
     oc edit configs.imageregistry.operator.openshift.io
     ```
 
-2. Add `pvc: claim:` in `storage`. Leave the value of claim blank. OpenShift will auto populate it. The result should look something like this:
+2. Add `pvc: claim:` in `storage`. Leave the value of claim blank. OpenShift will auto populate it. The result should look something like this (remove the curly braces after `storage`):
 
     ```yaml
     spec:
