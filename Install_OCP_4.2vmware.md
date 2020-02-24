@@ -972,11 +972,11 @@ storage                                    4.2.16    True        False         F
         readOnly: false
         replicas: 1
         requests:
-        read:
+          read:
             maxInQueue: 0
             maxRunning: 0
             maxWaitInQueue: 0s
-        write:
+          write:
             maxInQueue: 0
             maxRunning: 0
             maxWaitInQueue: 0s
