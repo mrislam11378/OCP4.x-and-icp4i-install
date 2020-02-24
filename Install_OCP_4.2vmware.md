@@ -935,7 +935,7 @@ storage                                    4.2.16    True        False         F
         accessModes:
         - ReadWriteMany
         resources:
-        requests:
+          requests:
             storage: 100Gi
         persistentVolumeReclaimPolicy: Retain
         storageClassName: csi-cephfs
@@ -966,9 +966,9 @@ storage                                    4.2.16    True        False         F
         logging: 2
         managementState: Managed
         proxy:
-        http: ""
-        https: ""
-        noProxy: ""
+          http: ""
+          https: ""
+          noProxy: ""
         readOnly: false
         replicas: 1
         requests:
@@ -981,7 +981,7 @@ storage                                    4.2.16    True        False         F
             maxRunning: 0
             maxWaitInQueue: 0s
         storage:
-        pvc:
+          pvc:
             claim:
     ```
 
