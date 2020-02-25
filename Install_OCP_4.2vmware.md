@@ -49,7 +49,7 @@ Below are some recommendations that should be followed.
 ## Common mistakes
 
 - The VM `Network Adapter` should be assigned to `ocp`
-- The `resource pool`, `folder` name in vSphere and `route base` (xx.$USER.ocp.csplab.local), the user folder inside `/opt` **MUST** match.
+- The `cluster name`, `folder` name in vSphere and `route base` (xx.$USER.ocp.csplab.local), the user folder inside `/opt` **MUST** match.
 - Anywhere you see a **[square brackets]**, replace the contents along with the brackets and paste in your content
 - Do **NOT** turn on the master, worker, storage nodes untill all the configs will done in the install node and load balancer.
 
