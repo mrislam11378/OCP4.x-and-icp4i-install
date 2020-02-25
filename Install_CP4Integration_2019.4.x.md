@@ -35,7 +35,7 @@ tar xvf installer_files/cluster/images/common-services-armonk-x86_64.tar.gz -O |
 
 ## Creating config.yaml
 
-Create a backup of the default `config.yaml` and paste in the following configs.
+Create a backup of the default `config.yaml` inside of `/opt/cp4ioffline/installer_files/cluster` and paste in the following configs.
 
 ```yaml
 # Licensed Materials - Property of IBM
@@ -162,6 +162,7 @@ sudo chmod 755 getAllRec.sh
 ```
 
 getAllRec.sh file
+
 ```bash
 #!/bin/bash
 PROJECT=$1
