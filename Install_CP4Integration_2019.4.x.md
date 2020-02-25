@@ -2,10 +2,20 @@
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Setting the max_map_count](#setting-the-max_map_count)
 - [Download and extract the image](#download-and-extract-the-image)
 - [Creating config.yaml](#creating-configyaml)
 - [Creating getAllRec.sh](#creating-getallrecsh)
 - [Starting the install process](#starting-the-install-process)
+
+## Setting the max_map_count
+
+SSH into all your worker and storage nodes and set the max_map_count to 262144
+
+```bash
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+```
 
 ## Download and extract the image
 
