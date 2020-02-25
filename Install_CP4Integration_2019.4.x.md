@@ -30,7 +30,7 @@ cd /opt
 wget http://storage4.csplab.local/storage/cp4i/ibm-cp-int-2019.4.1-offline.tar.gz
 mkdir cp4ioffline
 tar xf ibm-cp-int-2019.4.1-offline.tar.gz --directory /opt/cp4ioffline
-cd cp4ioffline/installer_files
+cd cp4ioffline
 tree
 tar xvf installer_files/cluster/images/common-services-armonk-x86_64.tar.gz -O | sudo docker load
 ```
