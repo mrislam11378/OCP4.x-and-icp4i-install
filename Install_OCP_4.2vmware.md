@@ -195,7 +195,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         vsphere:
           vcenter: demo-vcenter.csplab.local
           username: Muhammad.Islam
-          password: xY0mwGM9nD=2*H41#J
+          password: [**************]
           datacenter: CSPLAB
           defaultDatastore: SANDBOX_TIER4
       pullSecret: '[your pull secret. Dont forget the single quotes]'
