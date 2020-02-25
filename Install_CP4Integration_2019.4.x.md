@@ -10,7 +10,9 @@
 
 ## Setting the max_map_count
 
-SSH into all your worker and storage nodes and set the max_map_count to 262144
+SSH into all your worker and storage nodes and set the max_map_count to 262144.
+
+**Note:** To ssh into worker and storage nodes, you need `core@[IP/dnsname]`
 
 ```bash
 sudo sysctl -w vm.max_map_count=262144
