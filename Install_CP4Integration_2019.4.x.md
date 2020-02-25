@@ -8,6 +8,8 @@
 - [Creating getAllRec.sh](#creating-getallrecsh)
 - [Starting the install process](#starting-the-install-process)
 
+**NOTE: Make sure you have 250GB or more on your installer node.**
+
 ## Setting the max_map_count
 
 SSH into all your worker and storage nodes and set the max_map_count to 262144.
@@ -32,6 +34,8 @@ cd cp4ioffline/installer_files
 tree
 tar xvf installer_files/cluster/images/common-services-armonk-x86_64.tar.gz -O | sudo docker load
 ```
+
+you can delete `ibm-cp-int-2019.4.1-offline.tar.gz` now if you're low on space.
 
 ## Creating config.yaml
 
