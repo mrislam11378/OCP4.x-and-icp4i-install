@@ -12,7 +12,7 @@
 
 SSH into all your worker and storage nodes and set the max_map_count to 262144.
 
-**Note:** To ssh into worker and storage nodes, you do `ssh core@[IP/dnsname]`
+**Note:** To ssh into worker and storage nodes, you need `ssh core@[IP/dnsname]`
 
 ```bash
 sudo sysctl -w vm.max_map_count=262144
@@ -151,6 +151,8 @@ roks_user_prefix: ""
 ```
 
 ## Creating getAllRec.sh
+
+When the installer fails, this script will echo all the pods that are up and running and pods that are failing.
 
 ```bash
 cd /opt
