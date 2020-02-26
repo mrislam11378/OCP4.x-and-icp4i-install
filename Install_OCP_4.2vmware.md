@@ -91,7 +91,10 @@ Using the specs above (assuming you're not installing any Cloud Pak), we'll now 
 10. For `Network adapter 1` be sure to switch to OCP. `Drop Down -> Browse -> OCP`.
 11. If you want to manually assign `MAC Addresses`, select `Manual` from the `MAC Address` drop down and paste your mac address.
 12. If you see Network adapter 2, delete it.
-13. That should be all, hit next and finish creating your vm.
+13. Click the `VM Options` tab and expand the `Advanced` drop down.
+14. Under `Configuration Parameters`, click the `Edit Configuration...` button.
+15. At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the Add button and then the Next button </br> ![disk.EnableUUID](images/disk-enable-uuid.png) </br>
+16. That should be all, hit next and finish creating your vm.
 
 **Note:** Do **NOT** turn on your VMs until instructed. If you do, you've to delete them and recreate them.
 **NOTE: Please be a Good Datacenter Citizen**. Read through `Being a Good Datacenter Citizen` from [Cloud Adoption Lab](https://csplab.dfw.ibm.com/) if this is your first time making the cluster.
