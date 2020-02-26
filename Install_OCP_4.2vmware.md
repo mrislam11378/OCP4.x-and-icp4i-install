@@ -56,7 +56,7 @@ Below are some recommendations that should be followed.
 
 ## Cluster Configuration
 
-**Node Type**|**Number of Nodes**|**CPU**|**RAM**|**DISK**|**DISK2**|**Template**
+**Node Type**|**Number of Nodes**|**CPU**|**RAM (GB)**|**DISK (GB)**|**DISK2 (GB)**|**Template**
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 Master|3|16|64|300| | rhcos-4.2.0-x86_64-vmware-template |
 Worker|3|4|16|200| | rhcos-4.2.0-x86_64-vmware-template |
