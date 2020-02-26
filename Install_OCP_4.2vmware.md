@@ -93,8 +93,8 @@ Using the specs above (assuming you're not installing any Cloud Pak), we'll now 
 12. If you see Network adapter 2, delete it.
 13. you don't need to follow steps 14-16 for the `installer` node and the `load-balancer (lb)` node. But you need it for master, worker, storage and bootstrap.
 14. Click the `VM Options` tab and expand the `Advanced` drop down.
-15. Under `Configuration Parameters`, click the `Edit Configuration...` button.
-16. At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the Add button and then the Next button </br> ![disk.EnableUUID](images/disk-enable-uuid.png) </br>
+15. Under `Configuration Parameters`, click the `Edit Configuration...` button. Then `Add Configuration Params`
+16. Next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `OK` button and then the Next button </br> ![disk.EnableUUID](images/config-param-2.png) </br>
 17. That should be all, hit next and finish creating your vm.
 
 **Note:** Do **NOT** turn on your VMs until instructed. If you do, you've to delete them and recreate them.
