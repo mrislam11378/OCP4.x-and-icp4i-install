@@ -59,12 +59,11 @@ Below are some recommendations that should be followed.
 **Node Type**|**Number of Nodes**|**CPU**|**RAM**|**DISK**|**DISK2**|**Template**
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 Master|3|16|64|300| | rhcos-4.2.0-x86_64-vmware-template |
-Worker|8|4|16|200| | rhcos-4.2.0-x86_64-vmware-template |
+Worker|3|4|16|200| | rhcos-4.2.0-x86_64-vmware-template |
 Storage|3|4|16|200|500 | rhcos-4.2.0-x86_64-vmware-template |
 Bootstrap|1|4|16|100| | rhcos-4.2.0-x86_64-vmware-template |
 Install|1|4|16|200| | ocp42-installer-template |
 LB|1|4|16|120| | ocp42-lb-template |
-NFS|1|2|8|500|  | nfs-server-template |
 
 **Note:** For installing could pak the workers might need to be scaled up. Common Configs:
 
