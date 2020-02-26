@@ -7,6 +7,7 @@
 - [Recommendations](#recommendations)
 - [Common mistakes](#common-mistakes)
 - [Cluster Configuration](#cluster-configuration)
+- [Creating the VMs in vSphere](#creating-the-vms-in-vsphere)
 - [Setting up Install Node](#setting-up-install-node)
 - [Setting up Load Balancer](#setting-up-load-balancer)
 - [Spinning up the cluster](#spinning-up-the-cluster)
