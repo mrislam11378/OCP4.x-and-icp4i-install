@@ -7,6 +7,7 @@
 - [Creating config.yaml](#creating-configyaml)
 - [Creating getAllRec.sh](#creating-getallrecsh)
 - [Starting the install process](#starting-the-install-process)
+- [Uninstalling Common Services](#uninstalling-common-services)
 
 **NOTE: Make sure you have 250GB or more on your installer node.**
 
@@ -241,4 +242,12 @@ Might fail waiting for pods to come up, retry on failure.
 cd /opt/cp4ioffline/installer_files/cluster
 oc config view > kubeconfig
 nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/icp-inception-amd64:3.2.2 addon -vvv | tee install.log &
+```
+
+## Uninstalling Common Services
+
+In case the installer fails on the same step multiple times, it's better to uninstall and try again. To uninstall
+
+```bash
+nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/icp-inception-amd64:3.2.2 addon -vvv uninstall-with-openshift | tee install.log &
 ```
