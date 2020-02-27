@@ -71,7 +71,7 @@ LB|1|4|16|120| | ocp42-lb-template |
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 CP4I|8|16|64|200|
 CP4A|8| | | |
-CP4Auto|8| | | |
+CP4Auto|5|8|16|100|
 CP4MCM|8| | | |
 CP4D|8| | | |
 
@@ -243,7 +243,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-4.  In your project folder (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `https://<install node IP>/<cluster name>/bootstrap.ign`
+4.  In your project directory (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `https://<install node IP>/<cluster name>/bootstrap.ign`
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     <details>
@@ -272,7 +272,13 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     </details>
 
-17. In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
+5. Go to the source url and see if the bootstrap.ign file is accessible through there. If not ensure the correct permissions are set for the `bootstrap.ign` file.
+
+   ```bash
+   chmod go+r bootstrap.ign
+   ```
+
+6.  In your project directory (`/opt/mislam`), encode `master.ign`, `worker.ign`, and `append-bootstrap.ign` into base64 strings.
 
     ```bash
     cd /opt/mislam
@@ -281,19 +287,19 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
     base64 -w0 worker.ign > worker.base64
     ```
 
-18. Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
+7.  Now login to vSphere, go to your cluster, select your bootstrap node. Then Configure -> Settings -> vApp Options -> Properties. </br>
     ![vApp Options](images/setIgnConfig.png) </br>
 
-19. You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
+8.  You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table. In the blank, put base64 and click OK.
     On your installation machine cat the text of append-bootstrap.b64 file to the screen:
   
     ```bash
     cat append-bootstrap.base64
     ```
 
-20. Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
+9.  Copy the output from this file. Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click OK.
 
-21. Repeat these steps for each node in your cluster. For the `master/control nodes` use the `master.base64` ignition file and for the `compute/worker nodes` use the `worker.base64` text. For `storage nodes`, use the `worker.base64`.
+10. Repeat these steps for each node in your cluster. For the `master/control nodes` use the `master.base64` ignition file and for the `compute/worker nodes` use the `worker.base64` text. For `storage nodes`, use the `worker.base64`.
 
 Now you have set up your install node. But before moving on some packages should be installed for future steps.
 
