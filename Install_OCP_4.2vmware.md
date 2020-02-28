@@ -403,31 +403,31 @@ Use `ocp42-lb-template` as template. Same location as the installer template. We
       backend http
           balance roundrobin
           mode    http
-          server  compute-0 <IP address>:80 check
-          server  compute-1 <IP address>:80 check
-          server  compute-2 <IP address>:80 check
-          server  compute-3 <IP address>:80 check
-          server  compute-4 <IP address>:80 check
-          server  compute-5 <IP address>:80 check
-          server  compute-6 <IP address>:80 check
-          server  compute-7 <IP address>:80 check
-          server  storage-0 <IP address>:80 check
-          server  storage-1 <IP address>:80 check
-          server  storage-2 <IP address>:80 check
+          server  compute1 <IP address>:80 check
+          server  compute2 <IP address>:80 check
+          server  compute3 <IP address>:80 check
+          server  compute4 <IP address>:80 check
+          server  compute5 <IP address>:80 check
+          server  compute6 <IP address>:80 check
+          server  compute7 <IP address>:80 check
+          server  compute8 <IP address>:80 check
+          server  storage1 <IP address>:80 check
+          server  storage2 <IP address>:80 check
+          server  storage3 <IP address>:80 check
       backend https
           balance roundrobin
           mode tcp
-          server  compute-0 <IP Address>:443 check
-          server  compute-1 <IP Address>:443 check
-          server  compute-2 <IP Address>:443 check
-          server  compute-3 <IP Address>:443 check
-          server  compute-4 <IP Address>:443 check
-          server  compute-5 <IP Address>:443 check
-          server  compute-6 <IP Address>:443 check
-          server  compute-7 <IP Address>:443 check
-          server  storage-0 <IP Address>:443 check
-          server  storage-1 <IP Address>:443 check
-          server  storage-2 <IP Address>:443 check
+          server  compute1 <IP Address>:443 check
+          server  compute2 <IP Address>:443 check
+          server  compute3 <IP Address>:443 check
+          server  compute4 <IP Address>:443 check
+          server  compute5 <IP Address>:443 check
+          server  compute6 <IP Address>:443 check
+          server  compute7 <IP Address>:443 check
+          server  compute8 <IP Address>:443 check
+          server  storage1 <IP Address>:443 check
+          server  storage2 <IP Address>:443 check
+          server  storage3 <IP Address>:443 check
       ```
   
     </details>
@@ -709,17 +709,17 @@ storage                                    4.2.16    True        False         F
           useAllDevices: false
           config:
           nodes:
-          - name: "storage-0"
+          - name: "storage1"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
               config:
                 osdsPerDevice: "1"
-          - name: "storage-1"
+          - name: "storage2"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
               config:
                 osdsPerDevice: "1"
-          - name: "storage-2"
+          - name: "storage3"
             devices: # specific devices to use for storage can be specified for each node
             - name: "sdb"
               config:
@@ -1246,44 +1246,44 @@ backend api
     mode tcp
     balance roundrobin
     server bootstrap       <IP Address>:6443 check
-    server control-plane-0 <IP Address>:6443 check
     server control-plane-1 <IP Address>:6443 check
     server control-plane-2 <IP Address>:6443 check
+    server control-plane-3 <IP Address>:6443 check
 backend machine-config
     mode tcp
     balance roundrobin
     server bootstrap       <IP address>:22623 check
-    server control-plane-0 <IP address>:22623 check
     server control-plane-1 <IP address>:22623 check
     server control-plane-2 <IP address>:22623 check
+    server control-plane-3 <IP address>:22623 check
 backend http
     balance roundrobin
     mode    http
-    server  compute-0 <IP address>:80 check
-    server  compute-1 <IP address>:80 check
-    server  compute-2 <IP address>:80 check
-    server  compute-3 <IP address>:80 check
-    server  compute-4 <IP address>:80 check
-    server  compute-5 <IP address>:80 check
-    server  compute-6 <IP address>:80 check
-    server  compute-7 <IP address>:80 check
-    server  storage-0 <IP address>:80 check
-    server  storage-1 <IP address>:80 check
-    server  storage-2 <IP address>:80 check
+    server  compute1 <IP address>:80 check
+    server  compute2 <IP address>:80 check
+    server  compute3 <IP address>:80 check
+    server  compute4 <IP address>:80 check
+    server  compute5 <IP address>:80 check
+    server  compute6 <IP address>:80 check
+    server  compute7 <IP address>:80 check
+    server  compute8 <IP address>:80 check
+    server  storage1 <IP address>:80 check
+    server  storage2 <IP address>:80 check
+    server  storage3 <IP address>:80 check
 backend https
     balance roundrobin
     mode tcp
-    server  compute-0 <IP Address>:443 check
-    server  compute-1 <IP Address>:443 check
-    server  compute-2 <IP Address>:443 check
-    server  compute-3 <IP Address>:443 check
-    server  compute-4 <IP Address>:443 check
-    server  compute-5 <IP Address>:443 check
-    server  compute-6 <IP Address>:443 check
-    server  compute-7 <IP Address>:443 check
-    server  storage-0 <IP Address>:443 check
-    server  storage-1 <IP Address>:443 check
-    server  storage-2 <IP Address>:443 check
+    server  compute1 <IP Address>:443 check
+    server  compute2 <IP Address>:443 check
+    server  compute3 <IP Address>:443 check
+    server  compute4 <IP Address>:443 check
+    server  compute5 <IP Address>:443 check
+    server  compute6 <IP Address>:443 check
+    server  compute7 <IP Address>:443 check
+    server  compute8 <IP Address>:443 check
+    server  storage1 <IP Address>:443 check
+    server  storage2 <IP Address>:443 check
+    server  storage3 <IP Address>:443 check
 ```
 
 Too few `PG`
