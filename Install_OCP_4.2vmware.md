@@ -194,7 +194,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         name: master
         replicas: 3
       metadata:
-        name: mislam
+        name: [mislam #should be your cluster name]
       platform:
         vsphere:
           vcenter: demo-vcenter.csplab.local
