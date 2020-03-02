@@ -127,7 +127,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 4. This will create a document root of `/var/www/html`.  Create a softlink from the document root to your project directory.
 
     ```bash
-    ln -s /opt/mislam /var/www/html/
+    sudo ln -s /opt/mislam /var/www/html/
     ```
 
 5. Download the OpenShift client and installer.
