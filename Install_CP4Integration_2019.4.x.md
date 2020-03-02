@@ -241,6 +241,32 @@ Might fail waiting for pods to come up, retry on failure.
 ```bash
 cd /opt/cp4ioffline/installer_files/cluster
 oc config view > kubeconfig
+```
+
+Now `cat` your kubeconfig file and see if it has `insecure-skip-tls-verify: true`config. The cluster part should look something like this.
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://api.mislam.ocp.csplab.local:6443
+  name: api-mislam-ocp-csplab-local:6443
+```
+
+But if you see these, you have to replace `certificate-authority-data: DATA+OMITTED` with `insecure-skip-tls-verify: true`
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://api.mislam.ocp.csplab.local:6443
+```
+
+Now we run the installer. Notice it's a nohup job (runs on the background) and the logs are written to `install.log` so you can close your terminal and leave but the installer will keep on going on the server. And log back in and look at `install.log` to see progress.
+
+```bash
 nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/icp-inception-amd64:3.2.2 addon -vvv | tee install.log &
 ```
 
