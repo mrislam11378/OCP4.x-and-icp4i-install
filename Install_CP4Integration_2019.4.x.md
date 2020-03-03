@@ -275,5 +275,5 @@ nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/clust
 In case the installer fails on the same step multiple times, it's better to uninstall and try again. To uninstall
 
 ```bash
-nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/icp-inception-amd64:3.2.2 addon -vvv uninstall-with-openshift | tee install.log &
+nohup sudo docker run -t --net=host -e LICENSE=accept -v $(pwd):/installer/cluster:z -v /var/run:/var/run:z -v /etc/docker:/etc/docker:z --security-opt label:disable ibmcom/icp-inception-amd64:3.2.2 uninstall-with-openshift | tee install.log &
 ```
