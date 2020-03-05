@@ -925,7 +925,7 @@ storage                                    4.2.16    True        False         F
 25. Go the the `/csi/rbd` and Create a PVC to be consumed by the image registry (pvc.yaml)
 
     ```bash
-    cd /csi/rbd
+    cd csi/rbd
     vim pvc.yaml
     ```
 
@@ -1368,5 +1368,5 @@ openshift-image-registry   image-registry-storage   Bound    pvc-ec0cf7c0-4d47-1
 - Why are the correct IP addresses not being assigned to my nodes?
 **Ans:** You might've assigned a wrong network adapter in your vms. Make sure the network adapter is `OCP` and not `csplab`
 
-- Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
+- Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/mislam/bootstrap.ign` in the url?
 **Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
