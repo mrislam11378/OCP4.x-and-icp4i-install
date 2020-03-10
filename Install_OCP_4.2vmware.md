@@ -745,6 +745,56 @@ storage                                    4.2.16    True        False         F
     watch -n5 "oc get pods -n rook-ceph"
     ```
 
+    The output should look something like this
+
+    ```bash
+      NAME                                           READY   STATUS      RESTARTS   AGE
+      csi-cephfsplugin-2xswk                         3/3     Running     0          77m
+      csi-cephfsplugin-cbcrw                         3/3     Running     0          77m
+      csi-cephfsplugin-fllg7                         3/3     Running     0          77m
+      csi-cephfsplugin-n5xsm                         3/3     Running     0          77m
+      csi-cephfsplugin-provisioner-5ff8f845f-cxzfh   4/4     Running     9          77m
+      csi-cephfsplugin-provisioner-5ff8f845f-ffzdm   4/4     Running     1          77m
+      csi-cephfsplugin-xkc82                         3/3     Running     0          77m
+      csi-cephfsplugin-z2nml                         3/3     Running     0          77m
+      csi-rbdplugin-2lcpd                            3/3     Running     0          77m
+      csi-rbdplugin-6sc86                            3/3     Running     0          77m
+      csi-rbdplugin-6txb7                            3/3     Running     0          77m
+      csi-rbdplugin-8f7q2                            3/3     Running     0          77m
+      csi-rbdplugin-provisioner-5dd69bb477-8m28t     5/5     Running     3          77m
+      csi-rbdplugin-provisioner-5dd69bb477-r5d75     5/5     Running     8          77m
+      csi-rbdplugin-tb97j                            3/3     Running     1          77m
+      csi-rbdplugin-wcstg                            3/3     Running     0          77m
+      rook-ceph-agent-84bhs                          1/1     Running     0          77m
+      rook-ceph-agent-gddcm                          1/1     Running     0          77m
+      rook-ceph-agent-kjwth                          1/1     Running     0          77m
+      rook-ceph-agent-vghwr                          1/1     Running     0          77m
+      rook-ceph-agent-wtctl                          1/1     Running     0          77m
+      rook-ceph-agent-xx5vz                          1/1     Running     0          77m
+      rook-ceph-mds-myfs-a-86b87885d4-4wzld          1/1     Running     0          55m
+      rook-ceph-mds-myfs-b-fdffdc654-wdjxc           1/1     Running     0          55m
+      rook-ceph-mgr-a-6587d495b5-4cf5w               1/1     Running     0          61m
+      rook-ceph-mon-a-86646f4495-snz9t               1/1     Running     0          64m
+      rook-ceph-mon-b-6654dc496b-7jdlx               1/1     Running     0          64m
+      rook-ceph-mon-c-554c8cfbb-92hcd                1/1     Running     0          63m
+      rook-ceph-operator-65c48b4446-nmfxw            1/1     Running     3          91m
+      rook-ceph-osd-0-764d7494f6-9krrf               1/1     Running     0          59m
+      rook-ceph-osd-1-675bd8c687-8gl5m               1/1     Running     0          59m
+      rook-ceph-osd-2-5b6b445f9b-ls2sq               1/1     Running     0          59m
+      rook-ceph-osd-prepare-storage1-l62p4           0/1     Completed   0          33m
+      rook-ceph-osd-prepare-storage2-4rjpn           0/1     Completed   0          33m
+      rook-ceph-osd-prepare-storage3-xzrtf           0/1     Completed   0          33m
+      rook-ceph-tools-5c7c87dd5c-pwqs4               1/1     Running     0          61m
+      rook-discover-48tw4                            1/1     Running     0          91m
+      rook-discover-54n69                            1/1     Running     0          91m
+      rook-discover-6sdnm                            1/1     Running     0          91m
+      rook-discover-dls5t                            1/1     Running     0          91m
+      rook-discover-g8k6f                            1/1     Running     0          91m
+      rook-discover-p8rvh                            1/1     Running     0          91m
+    ```
+  
+    **NOTE: Wait until you have 3 osd and mon pods up**
+
 10. Create the Ceph toolbox pod to check cluster health
 
     ```bash
@@ -925,7 +975,7 @@ storage                                    4.2.16    True        False         F
 25. Go the the `/csi/rbd` and Create a PVC to be consumed by the image registry (pvc.yaml)
 
     ```bash
-    cd /csi/rbd
+    cd csi/rbd
     vim pvc.yaml
     ```
 
@@ -1368,5 +1418,5 @@ openshift-image-registry   image-registry-storage   Bound    pvc-ec0cf7c0-4d47-1
 - Why are the correct IP addresses not being assigned to my nodes?
 **Ans:** You might've assigned a wrong network adapter in your vms. Make sure the network adapter is `OCP` and not `csplab`
 
-- Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/opt/mislam/bootstrap.ign` in the url?
+- Why is the source url inside append-bootstrap.ign `/mislam/bootstrap.ign` instead of `/mislam/bootstrap.ign` in the url?
 **Ans:** Well, in an earlier step you created a softlink from the document root (`/var/www/html`) to your project directory (`/opt/mislam`) after ensuring httpd server (apache2) is installed and running. So when you have an httpd server running in linux, only the contents inside `/var/www/html` are accessible using the ip where our softlink to `/opt/mislam` is located. httpd does it so that any random unauthorized person doesn't get access to the entire file system but only what's public i.e. things inside `/www/html`. Refer to [Victor's Guide](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md) for more details.
