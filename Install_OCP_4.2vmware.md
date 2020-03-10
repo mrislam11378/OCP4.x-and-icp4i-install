@@ -622,11 +622,14 @@ storage                                    4.2.16    True        False         F
     oc label node storage3 role=storage-node
     ```
 
-3. Clone the rook project from github
+3. Clone the rook project from github & checkout to most stable branch of Rook
 
    ```bash
    cd /opt
    git clone https://github.com/rook/rook.git
+   cd /opt/rook
+   git stash
+   git checkout 3d5776f 
    ```
 
 4. You should now have a subdirectory under `/opt` named `rook`:
