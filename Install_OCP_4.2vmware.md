@@ -243,7 +243,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
 
     This will create `bootstrap.ign`, `master.ign`, `worker.ign`, `/auth` and `metadata.json` inside your project directory.
 
-4.  In your project directory (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `https://<install node IP>/<cluster name>/bootstrap.ign`
+4.  In your project directory (`/opt/mislam`), create a new file named `append-bootstrap.ign` and paste the following contents. The source is `http://<install node IP>/<cluster name>/bootstrap.ign`
 **NOTE: Replace anything in [square brackets] with your values and remove the brackets**
 
     <details>
