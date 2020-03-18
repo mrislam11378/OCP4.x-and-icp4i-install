@@ -839,18 +839,28 @@ storage                                    4.2.16    True        False         F
     oc create -f storageclass.yaml
     ```
 
-14. Check that your new storage class was created:
-
-    ```bash
-    oc get sc
-    ```
-
-15. Deploy the CephFS storage class for ReadWriteMany PVs. For our OCP 4.2.x deployment, we need one RWX volume to use for the image registry. We will deploy the only available filesystem PV for use by the image registry later in this document.
+14. Deploy the CephFS storage class for ReadWriteMany PVs. For our OCP 4.2.x deployment, we need one RWX volume to use for the image registry. We will deploy the only available filesystem PV for use by the image registry later in this document.
 
     ```bash
     cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
     oc create -f storageclass.yaml
     oc get sc
+    ```
+
+15. Check that your new storage class was created:
+
+    ```bash
+    oc get sc
+    ```
+
+    The output should look something like this
+
+    ```bash
+    [root@install rbd]# oc get sc
+    NAME              PROVISIONER                     AGE
+    csi-cephfs        rook-ceph.cephfs.csi.ceph.com   23m
+    rook-ceph-block   rook-ceph.rbd.csi.ceph.com      24m
+    thin (default)    kubernetes.io/vsphere-volume    4h48m
     ```
 
 16. Create a filesystem to be used by our image registry
@@ -1010,6 +1020,14 @@ storage                                    4.2.16    True        False         F
 
     ```bash
     oc create -f pvc.yaml
+    ```
+
+27. Check if the pvc was create properly. Running `oc get pvc -n openshift-image-registry` will output something similar to this
+
+    ```bash
+    [root@install rbd] oc get pvc -n openshift-image-registry
+    NAME                     STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    image-registry-storage   Bound    pvc-4d648a82-696e-11ea-8e11-005056a5311e   100Gi      RWX            csi-cephfs     2m36s
     ```
 
 ## Configure image-registry
