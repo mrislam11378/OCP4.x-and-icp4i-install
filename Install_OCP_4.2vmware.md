@@ -14,7 +14,7 @@
 - [Check controller status](#check-controller-status)
 - [Configure Ceph Storage for the image-registry Operator](#configure-ceph-storage-for-the-image-registry-operator)
 - [Scaling up Nodes - in progress](#scaling-up-nodes---in-progress)
-- [Scaling out Cluster (Adding worker nodes) - in progress](#scaling-out-cluster-adding-worker-nodes---in-progress)
+- [Scaling out Cluster (Adding worker nodes)](#scaling-out-cluster-adding-worker-nodes)
 - [Appendix](#appendix)
   - [[A] Command History](#a-command-history)
     - [Install node](#install-node)
@@ -1134,7 +1134,9 @@ Login to your new cluster as kubeadmin with the credentials output to the screen
 
 To scale up a node, just Shut it down from vSphere. Then right click on the vm you want to modify, choose `Edit Settings`. Modify what you want and then turn it back up. That's it. Sometimes the node certs need to be approved. Check with `oc get csr`. Look at [Spinning up the cluster](#spinning-up-the-cluster) for more details.
 
-## Scaling out Cluster (Adding worker nodes) - in progress
+## Scaling out Cluster (Adding worker nodes)
+
+Refer to this: <https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/Install_OCP_4.x.md#appendix-e---adding-a-new-node-to-an-existing-cluster>
 
 ## Appendix
 
