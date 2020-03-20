@@ -74,6 +74,7 @@ CP4A|8| | | |
 CP4Auto|5|8|16|100|
 CP4MCM|8| | | |
 CP4D|8| | | |
+CPA4Sec |5|16|64|100|
 
 ## Creating the VMs in vSphere
 
