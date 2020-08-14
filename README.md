@@ -198,7 +198,7 @@ Use `ocp42-installer-template` as template. It should exist in `CSPLAB->SANDBOX-
         name: [mislam #should be your cluster name]
       platform:
         vsphere:
-          vcenter: demo-vcenter.csplab.local
+          vcenter: vcsa.csplab.local
           username: Muhammad.Islam
           password: [**************]
           datacenter: CSPLAB
